@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  /* Override purple and blue color palettes to map to the theme values */
+  --color-purple-50: #fffdf5;
+  --color-purple-100: #fef8e3;
+  --color-purple-200: #fdecc3;
+  --color-purple-300: #fbd68b;
+  --color-purple-400: #f8c158;
+  --color-purple-500: #f4b63a;
+  --color-purple-600: #e8a11a;
+  --color-purple-700: #d8900a;
+  --color-purple-800: #b27305;
+  --color-purple-900: #7c4f02;
+
+  --color-blue-50: #f3f6fc;
+  --color-blue-100: #e1e9f5;
+  --color-blue-200: #c9d8ee;
+  --color-blue-300: #a4c0e3;
+  --color-blue-400: #76a0d4;
+  --color-blue-500: #082a73;
+  --color-blue-600: #031b4e;
+  --color-blue-700: #021236;
+  --color-blue-800: #010a21;
+  --color-blue-900: #00040f;
+
+  /* Secondary: #0F172A */
+  --color-slate-900: #0f172a;
+  --color-slate-950: #05163d; /* dark mode background overrides */
+  --color-gray-900: #0f172a;
+
+  /* Pure White Page & Section Background */
+  --color-slate-50: #ffffff;
+  --color-gray-50: #ffffff;
+
+  /* Primary Text: #0f172a */
+  --color-slate-800: #0f172a;
+  --color-gray-800: #0f172a;
+  
+  /* Secondary Text: #64748b */
+  --color-slate-500: #64748b;
+  --color-gray-500: #64748b;
+  --color-slate-400: #9ca3af;
+  --color-gray-400: #9ca3af;
+
+  /* Dividers & Borders: #F1F5F9 */
+  --color-slate-200: #f1f5f9;
+  --color-gray-200: #f1f5f9;
+  --color-slate-100: #f1f5f9;
+  --color-gray-100: #f1f5f9;
+
+  /* Success, Warning, Danger overrides */
+  --color-green-500: #22c55e;
+  --color-amber-500: #f59e0b;
+  --color-red-500: #ef4444;
+}
+
+/* Enable class-based dark mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    font-family: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    @apply transition-colors duration-300 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100;
+  }
+}
+
+.shadow-soft {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(90deg, #d8900a 0%, #f4b63a 100%) !important;
+}
+
+/* Premium Buttery-Smooth Slow Scroll Reveal Animation */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  will-change: transform, opacity;
+  transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

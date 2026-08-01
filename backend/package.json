@@ -1,0 +1,33 @@
+{
+  "name": "trip-hawks-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build && node --watch --env-file=.env.local dist/server.js",
+    "build": "npx esbuild src/server.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/server.js",
+    "start": "node --env-file=.env.local dist/server.js",
+    "build:start": "npm run build && npm run start"
+  },
+  "dependencies": {
+    "@clerk/clerk-sdk-node": "^5.1.6",
+    "@google/genai": "^1.49.0",
+    "axios": "^1.15.2",
+    "bcryptjs": "^3.0.3",
+    "compression": "^1.8.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.6",
+    "svix": "^1.90.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.14.0",
+    "esbuild": "^0.25.0",
+    "typescript": "~5.8.2"
+  }
+}
