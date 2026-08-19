@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { CONTACT_INFO } from '../constants/config';
 
 const FAQ_ITEMS = [
   {
@@ -62,7 +63,7 @@ const CustomerService: React.FC = () => {
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Toll-Free Support</h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Available 24/7 for urgent help.</p>
-            <a href="tel:18887918007" className="text-2xl font-black text-blue-600 dark:text-blue-400 hover:underline">1888 791 8007</a>
+            <a href={CONTACT_INFO.HOTLINE_TEL} className="text-2xl font-black text-blue-600 dark:text-blue-400 hover:underline">{CONTACT_INFO.HOTLINE_DISPLAY}</a>
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-xl border border-slate-100 dark:border-slate-800 shadow-slate-200/50 dark:shadow-none hover:shadow-2xl transition-all group">

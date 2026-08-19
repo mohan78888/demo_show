@@ -1,5 +1,6 @@
 import React from 'react';
 import LegalPageLayout from './layout/LegalPageLayout';
+import { CONTACT_INFO } from '../constants/config';
 
 interface TermsPageProps {
   onBack: () => void;
@@ -41,7 +42,7 @@ const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
                 <h4 className="font-bold text-blue-900 dark:text-blue-100 mb-2">How it works:</h4>
                 <ul className="list-disc pl-5 space-y-2 text-sm text-blue-800 dark:text-blue-200">
                   <li><span className="font-bold">Exclusive Sourcing:</span> These fares are negotiated in bulk or sourced from non-public corporate GDS channels.</li>
-                  <li><span className="font-bold">Hotline Only:</span> Due to technical and contractual limitations, these specific fares cannot be booked directly through our website and require verification via our 24/7 hotline at <span className="text-blue-600 dark:text-blue-400 font-black underline">1888 791 8007</span>.</li>
+                  <li><span className="font-bold">Hotline Only:</span> Due to technical and contractual limitations, these specific fares cannot be booked directly through our website and require verification via our 24/7 hotline at <a href={CONTACT_INFO.HOTLINE_TEL} className="text-blue-600 dark:text-blue-400 font-black underline">{CONTACT_INFO.HOTLINE_DISPLAY}</a>.</li>
                   <li><span className="font-bold">Real-time Availability:</span> Offline prices are highly dynamic and subject to immediate verification during the call.</li>
                 </ul>
               </div>
@@ -92,7 +93,7 @@ const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
 
         {/* Closing */}
         <div className="mt-20 pt-10 border-t border-slate-100 dark:border-slate-800 text-center transition-colors">
-          <p className="text-slate-400 dark:text-slate-500 text-sm font-medium">Questions about our terms? Contact our Legal Desk at <span className="text-blue-600 dark:text-blue-400 font-bold">legal@tourhelpdesk.com</span></p>
+          <p className="text-slate-400 dark:text-slate-500 text-sm font-medium">Questions about our terms? Contact our Legal Desk at <a href={`mailto:${CONTACT_INFO.LEGAL_EMAIL}`} className="text-blue-600 dark:text-blue-400 font-bold">{CONTACT_INFO.LEGAL_EMAIL}</a></p>
         </div>
     </LegalPageLayout>
   );

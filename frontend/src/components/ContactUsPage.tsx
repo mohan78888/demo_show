@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CONTACT_INFO } from '../constants/config';
 
 interface ContactUsPageProps {
   onBack: () => void;
@@ -43,7 +44,7 @@ const ContactUsPage: React.FC<ContactUsPageProps> = ({ onBack }) => {
               </div>
               <div className="space-y-4 text-sm text-blue-100">
                 <p className="font-bold">Need faster support?</p>
-                <p>Call Our Toll free 24/7: <span className="font-black">1888 791 8007</span></p>
+                <p>Call Our Toll free 24/7: <a href={CONTACT_INFO.HOTLINE_TEL} className="font-black hover:underline">{CONTACT_INFO.HOTLINE_DISPLAY}</a></p>
                 <p>Email us at <a href="mailto:care@tourhelpdesk.com" className="underline">care@tourhelpdesk.com</a></p>
                 <div className="pt-4 mt-2 border-t border-blue-400/30">
                   <p className="font-bold mb-1 text-white">Company Address:</p>

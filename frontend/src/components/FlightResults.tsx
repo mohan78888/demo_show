@@ -17,6 +17,22 @@ const FlightResults: React.FC<FlightResultsProps> = ({
 }) => {
   const router = useRouter();
   const [displayCount, setDisplayCount] = useState<number>(initialLimit);
+  const [currencySymbol, setCurrencySymbol] = useState('$');
+  const [currencyCode, setCurrencyCode] = useState('USD');
+
+  React.useEffect(() => {
+    const updateCurrency = () => {
+      if (typeof window !== 'undefined') {
+        const code = localStorage.getItem('preferred_currency') || 'USD';
+        const symbol = localStorage.getItem('preferred_currency_symbol') || '$';
+        setCurrencyCode(code);
+        setCurrencySymbol(symbol);
+      }
+    };
+    updateCurrency();
+    window.addEventListener('currency_change', updateCurrency);
+    return () => window.removeEventListener('currency_change', updateCurrency);
+  }, []);
 
   if (!flights || flights.length === 0) return null;
 
@@ -49,98 +65,88 @@ const FlightResults: React.FC<FlightResultsProps> = ({
         <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
           Showing <span className="text-blue-600 dark:text-blue-400 font-extrabold">{visibleFlights.length}</span> of <span className="text-slate-900 dark:text-white font-extrabold">{flights.length}</span> available flights
         </p>
-        {flights.length > initialLimit && (
-          <button 
-            onClick={handleNavigateToFlightsPage}
-            className="text-xs font-extrabold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <span>Open Dedicated Flights Page</span>
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-            </svg>
-          </button>
-        )}
       </div>
 
       {/* Flight Cards List */}
       {visibleFlights.map((flight) => {
-        const isCheapest = flight.price === minPrice;
+        const isLowestPrice = flight.price === minPrice;
+
         return (
-          <div 
-            key={flight.id} 
-            className={`group relative bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-300 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-0.5 ${
-              isCheapest ? 'border-orange-200 dark:border-orange-900/50 ring-1 ring-orange-100 dark:ring-0' : 'border-slate-100 dark:border-slate-800'
+          <div
+            key={flight.id}
+            className={`group bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border transition-all duration-300 hover:shadow-xl relative ${
+              isLowestPrice
+                ? 'border-blue-300 dark:border-blue-800 shadow-md ring-1 ring-blue-400/30'
+                : 'border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-slate-700'
             }`}
           >
-            {isCheapest && (
-              <div className="absolute -top-3 left-6 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm z-10">
-                Cheapest Deal
+            {isLowestPrice && (
+              <div className="absolute -top-3 left-6 bg-blue-600 text-white text-[10px] uppercase tracking-widest font-black px-3 py-0.5 rounded-full shadow-sm">
+                Best Deal
               </div>
             )}
 
-            <div className="p-3 md:p-4 flex flex-col md:flex-row items-stretch gap-3 md:gap-5">
-              {/* Flight Info */}
-              <div className="flex-grow flex flex-col justify-center gap-3">
-                <div className="flex flex-col md:flex-row items-center gap-3 md:gap-5">
-                  {/* Airline Name & Class */}
-                  <div className="flex items-center gap-3 w-full md:w-1/4">
-                    <div>
-                      <h4 className="font-bold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-sm md:text-base">
-                        {flight.airline}
-                      </h4>
-                      <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500 font-medium">
-                        {flight.flightNumber || flight.class}
-                      </p>
-                    </div>
-                  </div>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              
+              {/* Airline Brand & Info */}
+              <div className="flex items-center gap-3 w-full md:w-1/4">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-slate-800 flex items-center justify-center text-blue-600 dark:text-blue-400 font-black text-xs shrink-0 border border-blue-100 dark:border-slate-700 shadow-inner">
+                  ✈
+                </div>
+                <div className="min-w-0">
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white tracking-tight truncate">{flight.airline}</h4>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{flight.flightNumber}</p>
+                </div>
+              </div>
 
-                  {/* Schedule */}
-                  <div className="flex items-center justify-between gap-3 md:gap-5 flex-grow w-full md:w-auto">
-                    <div className="text-center md:text-left min-w-[70px]">
-                      <span className="text-base md:text-lg font-bold text-slate-800 dark:text-white">{flight.departureTime}</span>
-                      <p className="text-[10px] md:text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">{flight.origin}</p>
-                    </div>
-
-                    <div className="flex flex-col items-center flex-grow px-4">
-                      <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-tighter">{flight.duration}</span>
-                      <div className="w-full h-[2px] bg-slate-100 dark:bg-slate-800 relative rounded-full">
-                        <div className="absolute top-1/2 left-0 w-2 h-2 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 -translate-y-1/2"></div>
-                        <div className="absolute top-1/2 right-0 w-2 h-2 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 -translate-y-1/2"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-900 px-2 group-hover:scale-125 transition-transform">
-                          <svg className="w-5 h-5 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.2c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.6.5-1.1z"/>
-                          </svg>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-bold text-blue-500 dark:text-blue-400 mt-2 uppercase tracking-widest">{flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop`}</span>
-                    </div>
-
-                    <div className="text-center md:text-right min-w-[70px]">
-                      <span className="text-base md:text-lg font-bold text-slate-800 dark:text-white">{flight.arrivalTime}</span>
-                      <p className="text-[10px] md:text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">{flight.destination}</p>
-                    </div>
-                  </div>
+              {/* Schedule & Route Timeline */}
+              <div className="flex-1 w-full flex items-center justify-between md:justify-center gap-4 lg:gap-8 px-2">
+                {/* Departure Time */}
+                <div className="text-left">
+                  <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tight">{flight.departureTime}</span>
+                  <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{flight.origin}</p>
                 </div>
 
-                {/* Baggage & Refundable Tag */}
-                <div className="border-t border-slate-100 dark:border-slate-800 pt-2.5 mt-1 w-full flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                      🧳 Baggage: <strong className="text-slate-900 dark:text-white font-extrabold">{flight.baggage || '15 KG'}</strong>
-                    </span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md">
-                      {flight.refundable ? 'Refundable Fares' : 'Standard Fare'}
-                    </span>
+                {/* Duration & Stops Visual */}
+                <div className="flex flex-col items-center min-w-[100px] sm:min-w-[120px]">
+                  <span className="text-[10px] md:text-[11px] font-bold text-slate-400 dark:text-slate-500 mb-1">{flight.duration}</span>
+                  <div className="w-full flex items-center gap-1">
+                    <div className="h-[2px] w-full bg-slate-200 dark:bg-slate-700 relative">
+                      {flight.stops > 0 && (
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-orange-400 border border-white dark:border-slate-900" />
+                      )}
+                    </div>
                   </div>
+                  <span className={`text-[10px] font-black uppercase tracking-wider mt-1 ${
+                    flight.stops === 0 ? 'text-emerald-500' : 'text-orange-500'
+                  }`}>
+                    {flight.stops === 0 ? 'Non-stop' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}
+                  </span>
                 </div>
+
+                {/* Arrival Time */}
+                <div className="text-right">
+                  <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tight">{flight.arrivalTime}</span>
+                  <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{flight.destination}</p>
+                </div>
+              </div>
+
+              {/* Flight Badges */}
+              <div className="hidden lg:flex flex-col gap-1 items-end w-28">
+                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
+                  {flight.class}
+                </span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                  {flight.refundable ? 'Refundable' : 'Standard'}
+                </span>
               </div>
 
               {/* Price & Booking CTA */}
               <div className="w-full md:w-1/4 lg:w-1/5 flex flex-row md:flex-col items-center justify-between md:justify-center border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 pt-3 md:pt-0 md:pl-5 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl md:rounded-b-none md:rounded-r-2xl -mx-3 -mb-3 px-3 md:mx-0 md:mb-0 pb-3 md:pb-0">
                 <div className="mb-0 md:mb-3">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-[10px] md:text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">INR</span>
-                    <span className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white">₹{flight.price.toLocaleString()}</span>
+                    <span className="text-[10px] md:text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{currencyCode}</span>
+                    <span className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white">{currencySymbol}{flight.price.toLocaleString()}</span>
                   </div>
                   <p className="text-[9px] md:text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-widest text-left md:text-center mt-0.5">Per Traveler</p>
                 </div>

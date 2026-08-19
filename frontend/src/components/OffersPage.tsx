@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { CONTACT_INFO } from '../constants/config';
 
 const ALL_OFFERS = [
   {
@@ -330,7 +331,7 @@ const OffersPage: React.FC<OffersPageProps> = ({ onBack }) => {
           <div className="shrink-0 relative z-10">
              <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center">
                 <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] block mb-2">Priority Support Line</span>
-                <a href="tel:18887918007" className="text-2xl font-black text-white hover:text-orange-500 transition-colors block mb-4">1888 791 8007</a>
+                <a href={CONTACT_INFO.HOTLINE_TEL} className="text-2xl font-black text-white hover:text-orange-500 transition-colors block mb-4">{CONTACT_INFO.HOTLINE_DISPLAY}</a>
                 <div className="flex items-center justify-center gap-2 text-emerald-400 text-[10px] font-bold">
                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
                    Expert Agents Online Now

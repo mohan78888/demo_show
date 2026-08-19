@@ -6,6 +6,8 @@ import TopHotels from './TopHotels';
 import HotelAutocomplete from './HotelAutocomplete';
 import HotelDetailsModal from './HotelDetailsModal';
 import HotelBookingModal from './HotelBookingModal';
+import Accordion from './ui/Accordion';
+import { HotelCard, RecommendedHotel } from './ui/HotelCard';
 import { hotelService, HotelSearchParams, HotelDetailInfo } from '../services/hotelService';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -53,13 +55,121 @@ const DESTINATIONS = [
 ];
 
 const EXPERIENCE_CARDS = [
-  { id: '1', title: 'Mountain Resorts', subtitle: 'Alpine Lodges & Spa', image: '/Images/Hotels/Zurich.webp' },
-  { id: '2', title: 'City Luxury', subtitle: 'Skyline Suites & Dining', image: '/Images/Hotels/Singapore.webp' },
-  { id: '3', title: 'Scenic Retreats', subtitle: 'Overwater Bungalows', image: '/Images/Hotels/Maldives.webp' },
-  { id: '4', title: 'Canal Sanctuaries', subtitle: 'Historic Palace Stays', image: '/Images/Hotels/Venice.webp' },
-  { id: '5', title: 'Tropical Pool Villas', subtitle: 'Private Jungle Havens', image: '/Images/Hotels/Bali.webp' },
-  { id: '6', title: 'Desert Palaces', subtitle: '7-Star Oasis Luxury', image: '/Images/Hotels/Abu Dhabi.webp' },
-  { id: '7', title: 'Aurora Glass Domes', subtitle: 'Arctic Stargazing Suites', image: '/Images/Hotels/Inari.webp' }
+  {
+    id: '1',
+    title: 'CELEBRATE IN PARADISE',
+    subtitle: 'Lounge under a colorful cabana or bungalow at one of our two heated outdoor pools—including an adult only pool.',
+    image: 'https://images.pexels.com/photos/1486222/pexels-photo-1486222.jpeg?auto=compress&cs=tinysrgb&w=1920',
+  },
+  {
+    id: '2',
+    title: 'LUXURY BEACHFRONT BUNGALOWS',
+    subtitle: 'Wake up to ocean breeze & direct turquoise water access with private butler service & sun deck loungers.',
+    image: 'https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg?auto=compress&cs=tinysrgb&w=1920',
+  },
+  {
+    id: '3',
+    title: 'WORLD-CLASS WELLNESS RESORTS',
+    subtitle: 'Rejuvenate mind and body with holistic hydrotherapy spas, oceanfront yoga & serene executive suites.',
+    image: 'https://images.pexels.com/photos/189349/pexels-photo-189349.jpeg?auto=compress&cs=tinysrgb&w=1920',
+  },
+  {
+    id: '4',
+    title: 'ROYAL PALM SANCTUARIES',
+    subtitle: 'Discover opulent architecture, private lagoons, Michelin-starred dining & top-tier luxury hospitality.',
+    image: 'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=1920',
+  }
+];
+
+const RECOMMENDED_HOTELS: RecommendedHotel[] = [
+  {
+    id: "rec-1",
+    name: "Deluxe King Room",
+    subtitle: "This room offers comfortable space with one king bed, a work desk and modern amenities.",
+    location: "Paris, France",
+    image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=800&auto=format&fit=crop",
+    rating: 4.9,
+    price: 249,
+    originalPrice: 320,
+    tag: "Luxury Stay"
+  },
+  {
+    id: "rec-2",
+    name: "Standard King (with sofa bed)",
+    subtitle: "This room offers 30 square metres of space with one king bed, sofa and a cozy corner.",
+    location: "Tokyo, Japan",
+    image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800&auto=format&fit=crop",
+    rating: 4.8,
+    price: 189,
+    originalPrice: 245,
+    tag: "Popular"
+  },
+  {
+    id: "rec-3",
+    name: "Premium King Room",
+    subtitle: "Spacious accommodation with a king-size bed, elegant interiors and premium facilities.",
+    location: "Bali, Indonesia",
+    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&auto=format&fit=crop",
+    rating: 4.9,
+    price: 175,
+    originalPrice: 230,
+    tag: "Best Value"
+  },
+  {
+    id: "rec-4",
+    name: "Executive Room",
+    subtitle: "Relax in a stylish room featuring a king bed, work area and beautiful modern interiors.",
+    location: "Dubai, UAE",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+    rating: 4.95,
+    price: 299,
+    originalPrice: 390,
+    tag: "5 Star"
+  },
+  {
+    id: "rec-5",
+    name: "Overwater Sunset Suite",
+    subtitle: "Private lagoon villa with glass floor view, infinity dip pool and open ocean sun deck.",
+    location: "Male, Maldives",
+    image: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?q=80&w=800&auto=format&fit=crop",
+    rating: 5.0,
+    price: 340,
+    originalPrice: 450,
+    tag: "Top Rated"
+  },
+  {
+    id: "rec-6",
+    name: "Central Park Suite",
+    subtitle: "Classic Manhattan luxury room with floor-to-ceiling city views and marble bath.",
+    location: "New York, USA",
+    image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=800&auto=format&fit=crop",
+    rating: 4.85,
+    price: 260,
+    originalPrice: 340,
+    tag: "City Center"
+  },
+  {
+    id: "rec-7",
+    name: "Alpine Chalet Room",
+    subtitle: "Cozy mountain view room featuring timber fireplace, heated floors and private balcony.",
+    location: "Zurich, Switzerland",
+    image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800&auto=format&fit=crop",
+    rating: 4.9,
+    price: 220,
+    originalPrice: 290,
+    tag: "Scenic View"
+  },
+  {
+    id: "rec-8",
+    name: "Caldera Sunset Villa",
+    subtitle: "Whitewashed Aegean suite carved into volcanic cliff with private plunge pool.",
+    location: "Santorini, Greece",
+    image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=800&auto=format&fit=crop",
+    rating: 4.92,
+    price: 210,
+    originalPrice: 275,
+    tag: "Honeymoon"
+  }
 ];
 
 const HOTEL_FAQS = [
@@ -255,7 +365,7 @@ const HotelsPage: React.FC = () => {
             />
             <button
               onClick={() => handleSearch()}
-              className="px-6 py-2 bg-blue-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-600/30 cursor-pointer"
+              className="px-6 py-2 bg-[#E8A11A] hover:bg-[#d69013] text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-[#E8A11A]/30 cursor-pointer"
             >
               {isLoading ? 'Searching...' : 'Search'}
             </button>
@@ -264,18 +374,20 @@ const HotelsPage: React.FC = () => {
       </div>
 
       {/* 2. HERO & HOTEL SEARCH ENGINE SECTION */}
-      <section className="relative bg-slate-900 pt-16 pb-8 sm:pt-20 sm:pb-10 md:pt-24 md:pb-12 overflow-hidden">
-        {/* Background Overlay Image */}
-        <div className="absolute inset-0 z-0">
+      <section className="relative bg-slate-950 pt-18 pb-16 sm:pt-24 sm:pb-32 md:pt-28 md:pb-36 min-h-[420px] sm:min-h-[520px] md:min-h-[580px] flex flex-col justify-center border-b-0">
+        {/* Background Overlay Image - Full HD Real Visibility */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <Image
-            src="/hero hotel/hero hotel.webp"
+            src="/hero hotel/hero2.webp"
             alt="Hotel Hero Background"
             fill
             priority
+            quality={100}
             sizes="100vw"
-            className="object-cover object-center opacity-55 md:opacity-65 transition-opacity duration-300"
+            className="object-cover object-center opacity-100 transition-all duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/65 via-slate-950/45 to-slate-950/90"></div>
+          {/* Faint, minimal gradient for text contrast without hiding real HD image background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/40"></div>
         </div>
 
         <motion.div
@@ -283,23 +395,23 @@ const HotelsPage: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
-          className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 md:px-8 text-center"
+          className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 md:px-8 text-center w-full"
         >
           {/* Heading */}
-          <motion.h1 variants={scrollRevealVariants} className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-tight max-w-4xl mx-auto drop-shadow-lg">
-            Book Hotels Worldwide <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-200 to-amber-300">with Exclusive Direct Rates</span>
+          <motion.h1 variants={scrollRevealVariants} className="text-lg sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-snug max-w-4xl mx-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]">
+            Book Hotels Worldwide <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400">with Exclusive Direct Rates</span>
           </motion.h1>
-          <motion.p variants={scrollRevealVariants} className="mt-1 text-slate-200 text-xs sm:text-sm max-w-2xl mx-auto font-semibold drop-shadow-md">
+          <motion.p variants={scrollRevealVariants} className="mt-1.5 text-xs sm:text-base text-white/95 max-w-2xl mx-auto font-medium drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
             Search over 100,000+ luxury stays, boutique hotels & resorts with zero hidden booking fees.
           </motion.p>
 
           {/* SEARCH FORM CARD */}
-          <motion.div variants={scrollRevealVariants} className="mt-4 sm:mt-6 max-w-5xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3 sm:p-4.5 rounded-2xl sm:rounded-3xl shadow-2xl border border-white/40 dark:border-slate-800 text-left">
+          <motion.div variants={scrollRevealVariants} className="mt-3.5 sm:mt-6 w-full max-w-5xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-[0_16px_48px_rgba(0,0,0,0.35)] border border-white/60 dark:border-slate-800 text-left box-border">
             <form onSubmit={handleSearch}>
 
               {/* TOP CONTROLS: Property Type, Guest Counter, Star Rating */}
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-2 pb-2 sm:gap-3 sm:mb-4 sm:pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 mb-2.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto scrollbar-hide shrink-0 max-w-full">
                   {(['all', 'hotels', 'resorts', 'villas'] as const).map((type) => (
                     <button
                       key={type}
@@ -307,8 +419,8 @@ const HotelsPage: React.FC = () => {
                       onClick={() => setStayType(type)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-extrabold capitalize whitespace-nowrap transition-all ${
                         stayType === type
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                          : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white"
+                          ? "bg-[#E8A11A] text-slate-950 shadow-md shadow-[#E8A11A]/30 font-black"
+                          : "text-slate-600 dark:text-slate-300 hover:text-[#E8A11A] dark:hover:text-white"
                       }`}
                     >
                       {type === 'all' ? 'All Stays' : type}
@@ -316,21 +428,23 @@ const HotelsPage: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                   {/* Guest Counter Popup */}
-                  <div className="relative">
+                  <div className="relative flex-1 sm:flex-initial min-w-0">
                     <button
                       type="button"
                       onClick={() => setShowGuestDropdown(!showGuestDropdown)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-extrabold text-slate-700 dark:text-slate-200 hover:border-blue-500 transition-all cursor-pointer"
+                      className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-extrabold text-slate-700 dark:text-slate-200 hover:border-[#E8A11A] transition-all cursor-pointer"
                     >
-                      <Users className="w-3.5 h-3.5 text-blue-600" />
-                      <span>{guests.adults + guests.children} Guest{(guests.adults + guests.children) > 1 ? 's' : ''}, {guests.rooms} Room{guests.rooms > 1 ? 's' : ''}</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="flex items-center gap-1.5 truncate">
+                        <Users className="w-3.5 h-3.5 text-[#E8A11A] shrink-0" />
+                        <span className="truncate">{guests.adults + guests.children} Guest{(guests.adults + guests.children) > 1 ? 's' : ''}, {guests.rooms} Room{guests.rooms > 1 ? 's' : ''}</span>
+                      </span>
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     </button>
 
                     {showGuestDropdown && (
-                      <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-2xl z-50 text-left">
+                      <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-[calc(100vw-3rem)] sm:w-72 max-w-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 shadow-2xl z-50 text-left">
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <p className="text-xs font-bold text-slate-900 dark:text-white">Adults</p>
@@ -417,7 +531,7 @@ const HotelsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowGuestDropdown(false)}
-                          className="w-full py-1.5 rounded-xl bg-blue-600 text-white font-extrabold text-xs uppercase"
+                          className="w-full py-1.5 rounded-xl bg-[#E8A11A] text-slate-950 font-black text-xs uppercase"
                         >
                           Done
                         </button>
@@ -428,7 +542,7 @@ const HotelsPage: React.FC = () => {
                   <select
                     value={starRating}
                     onChange={(e) => setStarRating(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-extrabold text-slate-700 dark:text-slate-200 outline-none"
+                    className="px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-extrabold text-slate-700 dark:text-slate-200 outline-none shrink-0"
                   >
                     <option value="any">Any Rating</option>
                     <option value="5">5 Star Luxury</option>
@@ -438,13 +552,13 @@ const HotelsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* SEARCH FIELDS GRID */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-3 items-center">
+              {/* SEARCH FIELDS GRID - 1 COL ON MOBILE, RESPONSIVE GRID ON TABLET/DESKTOP */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2 sm:gap-3 items-center w-full">
                 {/* Destination Autocomplete */}
-                <div className="md:col-span-4 flex items-center gap-2 sm:gap-3 p-2 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
-                  <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
+                <div className="col-span-1 sm:col-span-2 md:col-span-4 flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 w-full min-w-0">
+                  <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#E8A11A] shrink-0" />
                   <div className="w-full min-w-0">
-                    <label className="block text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Destination / Hotel</label>
+                    <label className="block text-[9px] sm:text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Destination / Hotel</label>
                     <HotelAutocomplete
                       value={destination}
                       onSelect={(dest) => {
@@ -457,39 +571,39 @@ const HotelsPage: React.FC = () => {
                 </div>
 
                 {/* Check-In */}
-                <div className="md:col-span-3 flex items-center gap-2 sm:gap-3 p-2 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
-                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
+                <div className="col-span-1 md:col-span-3 flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 w-full min-w-0">
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[#E8A11A] shrink-0" />
                   <div className="w-full min-w-0">
-                    <label className="block text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Check-In</label>
+                    <label className="block text-[9px] sm:text-[10px] font-extrabold uppercase text-slate-400 tracking-wider truncate">Check-In</label>
                     <input
                       type="date"
                       value={checkInDate}
                       onChange={(e) => setCheckInDate(e.target.value)}
-                      className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 dark:text-white outline-none cursor-pointer"
+                      className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 dark:text-white outline-none cursor-pointer p-0"
                     />
                   </div>
                 </div>
 
                 {/* Check-Out */}
-                <div className="md:col-span-3 flex items-center gap-2 sm:gap-3 p-2 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
-                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
+                <div className="col-span-1 md:col-span-3 flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 w-full min-w-0">
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[#E8A11A] shrink-0" />
                   <div className="w-full min-w-0">
-                    <label className="block text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Check-Out</label>
+                    <label className="block text-[9px] sm:text-[10px] font-extrabold uppercase text-slate-400 tracking-wider truncate">Check-Out</label>
                     <input
                       type="date"
                       value={checkOutDate}
                       onChange={(e) => setCheckOutDate(e.target.value)}
-                      className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 dark:text-white outline-none cursor-pointer"
+                      className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 dark:text-white outline-none cursor-pointer p-0"
                     />
                   </div>
                 </div>
 
                 {/* Search Button */}
-                <div className="md:col-span-2">
+                <div className="col-span-1 sm:col-span-2 md:col-span-2 w-full">
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 cursor-pointer disabled:opacity-60"
+                    className="w-full py-2.5 sm:py-3 bg-[#E8A11A] hover:bg-[#d69013] text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-[#E8A11A]/25 transition-all active:scale-95 cursor-pointer disabled:opacity-60"
                   >
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
@@ -503,12 +617,64 @@ const HotelsPage: React.FC = () => {
               )}
 
             </form>
+          </motion.div>          {/* FEATURED CAROUSEL - HIDDEN ON MOBILE, VISIBLE ON TABLET & DESKTOP */}
+          <motion.div variants={scrollRevealVariants} className="hidden sm:block mt-8 sm:mt-12 md:mt-16 relative z-20 -mb-24 sm:-mb-32 md:-mb-40 max-w-[1300px] mx-auto text-left px-2 sm:px-4">
+            {/* Floating Right Arrow Navigation Button on Peek Card */}
+            <button
+              type="button"
+              onClick={() => scrollExperience('right')}
+              className="absolute right-2 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-[#4A5D32]/85 hover:bg-[#4A5D32] text-white shadow-2xl backdrop-blur-md flex items-center justify-center transition-transform active:scale-90 cursor-pointer border border-white/30"
+              aria-label="Scroll Carousel Right"
+            >
+              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-white stroke-[2.5]" />
+            </button>
+
+            {/* Horizontal Carousel Track */}
+            <div
+              ref={experienceScrollRef}
+              className="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth scrollbar-hide snap-x py-2 px-1 w-full max-w-full"
+            >
+              {EXPERIENCE_CARDS.map((item) => (
+                <div
+                  key={item.id}
+                  className="sm:min-w-[580px] md:min-w-[680px] lg:min-w-[760px] shrink-0 bg-white rounded-none shadow-[0_16px_48px_rgba(0,0,0,0.5)] snap-start overflow-hidden border border-slate-200/80 flex flex-col justify-between"
+                >
+                  <div className="relative h-44 sm:h-52 md:h-56 w-full">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      priority={item.id === '1'}
+                      sizes="760px"
+                      className="object-cover object-center"
+                    />
+                  </div>
+
+                  <div className="p-4 sm:p-5 bg-white flex items-end justify-between gap-5 text-slate-900">
+                    <div className="max-w-xl">
+                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 uppercase tracking-tight">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
+                        {item.subtitle}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSearch()}
+                      className="w-28 sm:w-32 h-9 sm:h-10 bg-[#47A2F5] hover:bg-[#3492e8] rounded-md shadow-md shrink-0 transition-all cursor-pointer active:scale-95"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
         </motion.div>
       </section>
 
       {/* VALUE PROPOSITIONS BAR BELOW HERO */}
-      <section className="w-full bg-white dark:bg-slate-950 py-8 sm:py-10 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
+      <section className="w-full bg-white dark:bg-slate-950 py-8 sm:pt-32 md:pt-44 sm:pb-10 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
             
@@ -558,6 +724,49 @@ const HotelsPage: React.FC = () => {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* RECOMMENDED HOTELS FOR YOU SECTION */}
+      <section className="py-10 md:py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/60 dark:border-slate-800/60">
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-left">
+            <h2 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+              Recommended Hotels for You
+            </h2>
+            <p className="mt-1 text-slate-600 dark:text-slate-400 text-xs sm:text-sm font-medium">
+              Handpicked luxury stays & boutique resorts worldwide at exclusive direct rates.
+            </p>
+          </div>
+        </div>
+
+        {/* Desktop View: Clean 4-Column Grid (4 Cards Per Row) */}
+        <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {RECOMMENDED_HOTELS.map((hotel) => (
+            <HotelCard
+              key={hotel.id}
+              hotel={hotel}
+              onBookNow={(h) => {
+                setDestination(h.location.split(',')[0]);
+                handleSearch();
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Mobile View: Horizontal Swipeable Slider Carousel */}
+        <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 pb-4 px-1 w-full max-w-full">
+          {RECOMMENDED_HOTELS.map((hotel) => (
+            <div key={hotel.id} className="w-[85vw] min-w-[280px] shrink-0 snap-start">
+              <HotelCard
+                hotel={hotel}
+                onBookNow={(h) => {
+                  setDestination(h.location.split(',')[0]);
+                  handleSearch();
+                }}
+              />
+            </div>
+          ))}
         </div>
       </section>
 
@@ -830,50 +1039,7 @@ const HotelsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="space-y-3">
-            {HOTEL_FAQS.map((faq, idx) => {
-              const isOpen = openFaqIndex === idx;
-              return (
-                <div
-                  key={faq.num}
-                  className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-all duration-200 bg-white dark:bg-slate-900 shadow-sm"
-                >
-                  <button
-                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                    className="w-full px-5 py-4 flex items-center justify-between text-left gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-                  >
-                    <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-3">
-                      <span className="text-blue-600 dark:text-blue-400 font-black text-xs sm:text-sm shrink-0">
-                        {faq.num}.
-                      </span>
-                      <span>{faq.question}</span>
-                    </span>
-                    <ChevronDown
-                      className={`w-4 h-4 text-slate-400 transition-transform duration-300 shrink-0 ${
-                        isOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
-                      }`}
-                    />
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: 'easeInOut' }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/60 font-normal">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
+          <Accordion items={HOTEL_FAQS} />
         </div>
       </section>
 

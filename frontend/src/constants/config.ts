@@ -3,6 +3,7 @@ export const CONTACT_INFO = {
   HOTLINE_TEL: 'tel:18887918007',
   HOTLINE_DISPLAY: '1888 791 8007',
   SUPPORT_EMAIL: 'info@TourHelpDesk.com',
+  LEGAL_EMAIL: 'legal@tourhelpdesk.com',
   AVAILABILITY: '24/7 Booking Desk',
 } as const;
 

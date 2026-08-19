@@ -10,10 +10,10 @@ const TrustBar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-950 py-16 md:py-20 border-t border-slate-50 dark:border-slate-800 transition-colors duration-300">
+    <div className="bg-white dark:bg-slate-950 py-10 md:py-14 border-t border-slate-50 dark:border-slate-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         {/* Simplified Trust Indicators */}
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 mb-16 opacity-60 dark:opacity-80">
+        <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12 mb-10 opacity-60 dark:opacity-80">
           <div className="flex items-center gap-2">
             <svg className="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             <span className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">100% Secure</span>
@@ -30,11 +30,11 @@ const TrustBar: React.FC = () => {
 
         {/* Minimal Content - No Card */}
         <div className="text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full mb-4">
             <span className="text-[10px] font-black uppercase tracking-widest">Trusted Deals • Canada & US</span>
           </div>
           
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">
+          <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">
             Affordable Flights Across Canada & US
           </h2>
           

@@ -21,6 +21,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import { resolveIataCode } from '../components/AirportAutocomplete';
 
 import AuthModal from '../components/AuthModal';
+import OfflineHotlineBanner from '../components/common/OfflineHotlineBanner';
 
 const PromotionalPopup = React.lazy(() => import('../components/PromotionalPopup'));
 const FlightDetails = React.lazy(() => import('../components/FlightDetails'));
@@ -301,25 +302,7 @@ function HomeContent() {
                       <span className="text-lg md:text-xl font-bold text-slate-800 text-center">{searchParams.to?.split(',')[0]}</span>
                     </div>
 
-                    <div className="mb-6 md:mb-8 relative z-10 bg-slate-50 p-4 md:p-6 rounded-xl border border-slate-100 w-full">
-                      <p className="text-lg md:text-xl font-bold text-slate-800 mb-2">
-                        Online inventory currently unavailable
-                      </p>
-                      <p className="text-blue-600 font-semibold mb-2 text-sm md:text-base">
-                        We have 21+ unpublished offline flights available for this route.
-                      </p>
-                      <p className="text-slate-500 text-xs md:text-sm">
-                        Call our offline booking desk for exclusive deals and instant connection. No waiting time.
-                      </p>
-                    </div>
-
-                    <a
-                      href="tel:18887918007"
-                      className="relative z-10 flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white font-semibold px-8 py-3.5 md:px-10 md:py-4 rounded-xl text-base md:text-lg transition-all shadow-md group w-full sm:w-auto"
-                    >
-                      <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-                      Call Booking Desk
-                    </a>
+                    <OfflineHotlineBanner />
                   </div>
                 </div>
               )}

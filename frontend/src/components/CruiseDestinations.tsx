@@ -217,7 +217,7 @@ const CruiseDestinations: React.FC<CruiseDestinationsProps> = ({ onExplore }) =>
   };
 
   return (
-    <section className="py-10 md:py-14 bg-slate-50/70 dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden">
+    <section className="py-6 md:py-9 bg-slate-50/70 dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         
         {/* Exact Requested Title & Subtitle */}

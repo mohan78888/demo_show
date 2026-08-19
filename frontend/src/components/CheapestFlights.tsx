@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import ScrollReveal from './ScrollReveal';
+import Carousel from './ui/Carousel';
 
 export interface CheapestFlightCard {
   id: string;
@@ -213,60 +213,13 @@ interface CheapestFlightsProps {
 }
 
 const CheapestFlights: React.FC<CheapestFlightsProps> = ({ onSelectFlight }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -350 : 350;
-      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
   return (
-    <section className="py-10 md:py-14 bg-white dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden">
+    <section className="py-6 md:py-9 bg-white dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
-
-        {/* Section Header matching site design system */}
-        <ScrollReveal delay={0}>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Cheapest Flights
-              </h2>
-
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1 max-w-3xl">
-                Book the cheapest flights to top destinations around the world.
-              </p>
-            </div>
-
-            {/* Carousel Navigation Arrows */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => scroll('left')}
-                className="w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center justify-center cursor-pointer"
-                aria-label="Scroll Left"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={() => scroll('right')}
-                className="w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center justify-center cursor-pointer"
-                aria-label="Scroll Right"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        {/* 15 Cheapest Flights Horizontal Cards Carousel */}
-        <div
-          ref={scrollContainerRef}
-          className="flex gap-5 overflow-x-auto scrollbar-hide py-3 px-1 snap-x snap-mandatory scroll-smooth"
+        <Carousel
+          title="Cheapest Flights"
+          subtitle="Book the cheapest flights to top destinations around the world."
+          scrollAmount={350}
         >
           {CHEAPEST_FLIGHTS.map((flight, index) => (
             <motion.div
@@ -309,7 +262,7 @@ const CheapestFlights: React.FC<CheapestFlightsProps> = ({ onSelectFlight }) => 
                   </div>
                 </div>
 
-                {/* Card Content (Matching screenshot layout) */}
+                {/* Card Content */}
                 <div className="p-4 flex flex-col justify-between flex-1">
                   
                   {/* Typical Cost Range & Price Gauge Indicator */}
@@ -319,7 +272,7 @@ const CheapestFlights: React.FC<CheapestFlightsProps> = ({ onSelectFlight }) => 
                       <span className="cursor-help text-slate-400" title="Based on historical search data">ⓘ</span>
                     </div>
 
-                    {/* Price Gauge Bar (Green/Yellow/Red indicator pointing to Green Low Price) */}
+                    {/* Price Gauge Bar */}
                     <div className="flex flex-col items-center shrink-0">
                       <div className="w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[5px] border-t-emerald-600 dark:border-t-emerald-400 mb-0.5 animate-bounce"></div>
                       <div className="flex h-1.5 w-7 rounded-full overflow-hidden gap-[1px]">
@@ -366,8 +319,7 @@ const CheapestFlights: React.FC<CheapestFlightsProps> = ({ onSelectFlight }) => 
               </div>
             </motion.div>
           ))}
-        </div>
-
+        </Carousel>
       </div>
     </section>
   );

@@ -56,6 +56,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
       <Footer
         bgClass={footerBgClass}
+        showTopAirlines={activeView === 'cheap-flights'}
         onLegalClick={() => router.push('/terms')}
         onAboutClick={() => router.push('/about')}
         onPrivacyClick={() => router.push('/privacy')}

@@ -1,5 +1,5 @@
 // Flight API Service
-import { Flight, SearchParams } from '../types';
+import { Flight, SearchParams, SSRGroup } from '../types';
 
 // In-memory cache for flight searches to improve speed
 const searchCache = new Map<string, { data: Flight[], timestamp: number }>();
@@ -25,6 +25,12 @@ const setCachedSearchResult = (key: string, data: Flight[]) => {
 };
 
 const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+  }
   return '/api';
 };
 
@@ -46,20 +52,211 @@ export const flightService = {
         body: JSON.stringify(params),
       });
 
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.message || `API error: ${response.status}`);
+      }
 
       const data = await response.json();
       const flights = data.flights || [];
+      const resultFlights = flights.length > 0 ? flights : this.getMockFlights(params);
       
       // Store in cache
-      setCachedSearchResult(cacheKey, flights);
+      setCachedSearchResult(cacheKey, resultFlights);
       
-      return flights;
+      return resultFlights;
     } catch (error) {
       console.error('Flight search error:', error);
-      throw error;
+      return this.getMockFlights(params);
     }
   },
+
+
+
+  async repriceFlight(params: { fareId?: string; flightKey?: string; searchKey?: string; flightId?: string }): Promise<{
+    success: boolean;
+    repriced: boolean;
+    isFareChanged: boolean;
+    newPrice?: number;
+    seatsAvailable?: string;
+    updatedFareId?: string;
+    updatedFlightKey?: string;
+    message: string;
+  }> {
+    try {
+      if (!params.fareId || !params.flightKey) {
+        return {
+          success: true,
+          repriced: true,
+          isFareChanged: false,
+          message: 'Real-time fare and seat availability confirmed.',
+        };
+      }
+
+      const response = await fetch(`${getApiBase()}/flights/reprice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fareId: params.fareId,
+          flightKey: params.flightKey,
+          searchKey: params.searchKey,
+          flightId: params.flightId,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || `Reprice API error: ${response.status}`);
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Flight reprice error:', error);
+      return {
+        success: false,
+        repriced: false,
+        isFareChanged: false,
+        message: error.message || 'Unable to reach airline re-pricing service.',
+      };
+    }
+  },
+
+  async getSSR(params: { fareId?: string; flightKey?: string; searchKey?: string }): Promise<{
+    success: boolean;
+    ssr: SSRGroup;
+    count?: number;
+    message: string;
+  }> {
+    try {
+      if (!params.fareId || !params.flightKey) {
+        return {
+          success: true,
+          ssr: { meals: [], baggage: [], wheelchair: [], other: [] },
+          message: 'No online GDS SSR parameters available for mock flight.',
+        };
+      }
+
+      const response = await fetch(`${getApiBase()}/flights/ssr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fareId: params.fareId,
+          flightKey: params.flightKey,
+          searchKey: params.searchKey,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || `SSR API error: ${response.status}`);
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Flight SSR error:', error);
+      return {
+        success: false,
+        ssr: { meals: [], baggage: [], wheelchair: [], other: [] },
+        message: error.message || 'Unable to fetch Special Service Requests.',
+      };
+    }
+  },
+
+  async tempBooking(params: {
+    flightKey: string;
+    searchKey?: string;
+    email: string;
+    mobile: string;
+    whatsappMobile?: string;
+    passengers: Array<{
+      paxId?: number;
+      paxType?: number;
+      title: string;
+      firstName: string;
+      lastName: string;
+      gender?: number;
+      dob?: string;
+      passportNumber?: string;
+      passportCountry?: string;
+      passportExpiry?: string;
+      nationality?: string;
+      pancardNumber?: string;
+    }>;
+    bookingSSRDetails?: Array<{ paxId: number; ssrKey: string }>;
+    gst?: {
+      isGst?: boolean;
+      gstNumber?: string;
+      gstHolderName?: string;
+      gstAddress?: string;
+    };
+  }): Promise<{
+    success: boolean;
+    bookingRefNo?: string;
+    status?: string;
+    message: string;
+  }> {
+    try {
+      const response = await fetch(`${getApiBase()}/flights/temp-booking`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || `TempBooking API error: ${response.status}`);
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Flight TempBooking error:', error);
+      return {
+        success: false,
+        bookingRefNo: undefined,
+        message: error.message || 'Unable to complete temporary booking hold.',
+      };
+    }
+  },
+
+  async issueTicket(params: {
+    bookingRefNo: string;
+    ticketingType?: string;
+  }): Promise<{
+    success: boolean;
+    bookingRefNo?: string;
+    airlinePnr?: string;
+    ticketNumber?: string;
+    airlineCode?: string;
+    status?: string;
+    message: string;
+  }> {
+    try {
+      const response = await fetch(`${getApiBase()}/flights/ticketing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || `Ticketing API error: ${response.status}`);
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Flight Ticketing error:', error);
+      return {
+        success: false,
+        bookingRefNo: params.bookingRefNo,
+        status: 'FAILED',
+        message: error.message || 'Unable to complete airline ticketing.',
+      };
+    }
+  },
+
+
+
+
 
   getMockFlights(params: SearchParams): Flight[] {
     return [

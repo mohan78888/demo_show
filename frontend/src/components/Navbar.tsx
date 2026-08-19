@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { authService } from '../services/authService';
 
 interface NavbarProps {
@@ -20,6 +21,24 @@ interface NavbarProps {
 
 type MobileCategory = 'hotels' | 'flights' | 'packages' | 'cars' | 'cruises';
 
+export interface CurrencyOption {
+  code: string;
+  symbol: string;
+  name: string;
+  flag: string;
+}
+
+export const CURRENCIES: CurrencyOption[] = [
+  { code: 'USD', symbol: '$', name: 'US Dollar', flag: '🇺🇸' },
+  { code: 'EUR', symbol: '€', name: 'Euro', flag: '🇪🇺' },
+  { code: 'GBP', symbol: '£', name: 'British Pound', flag: '🇬🇧' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee', flag: '🇮🇳' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', flag: '🇨🇦' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', flag: '🇦🇺' },
+  { code: 'AED', symbol: 'AED', name: 'UAE Dirham', flag: '🇦🇪' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar', flag: '🇸🇬' },
+];
+
 const Navbar: React.FC<NavbarProps> = ({ 
   onLoginClick, 
   onLogoClick, 
@@ -33,11 +52,45 @@ const Navbar: React.FC<NavbarProps> = ({
   isSidebarCollapsed = false,
   onToggleSidebar
 }) => {
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyOption>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('preferred_currency');
+      if (saved) {
+        const found = CURRENCIES.find(c => c.code === saved);
+        if (found) return found;
+      }
+    }
+    return CURRENCIES[0]; // USD Default
+  });
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hideMobileCategoryStrip, setHideMobileCategoryStrip] = useState(false);
+
+  const currencyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
+        setShowCurrencyMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  const handleSelectCurrency = (curr: CurrencyOption) => {
+    setSelectedCurrency(curr);
+    setShowCurrencyMenu(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('preferred_currency', curr.code);
+      localStorage.setItem('preferred_currency_symbol', curr.symbol);
+      window.dispatchEvent(new Event('currency_change'));
+    }
+  };
 
   useEffect(() => {
     // Check local JWT user authentication
@@ -163,7 +216,7 @@ const Navbar: React.FC<NavbarProps> = ({
     setShowUserMenu(false);
   };
 
-  const isTripHeader = activeView === 'flights' || activeView === 'hotels';
+  const isTripHeader = activeView === 'flights' || activeView === 'hotels' || activeView === 'cheap-flights';
 
   return (
     <nav 
@@ -173,25 +226,22 @@ const Navbar: React.FC<NavbarProps> = ({
           : 'sticky top-0 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 shadow-sm'
       }`}
     >
-      <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-[64px] sm:h-[72px] relative">
+      <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between h-[54px] sm:h-[62px] relative">
         
         {/* Left: Hamburger + Logo + Inline Navigation Links */}
-        <div className="flex items-center gap-3 sm:gap-6 lg:gap-8 min-w-0">
+        <div className="flex items-center gap-3 sm:gap-5 lg:gap-7 min-w-0">
           {/* Hamburger Menu Icon */}
           <button 
             onClick={() => {
-              if (window.innerWidth >= 1024 && onToggleSidebar) {
-                onToggleSidebar();
-              } else {
-                setIsSidebarOpen(!isSidebarOpen);
-              }
+              setIsSidebarOpen(prev => !prev);
+              if (onToggleSidebar) onToggleSidebar();
             }}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               isTripHeader ? 'text-white hover:bg-white/10' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
             aria-label="Toggle Sidebar Menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
@@ -205,64 +255,20 @@ const Navbar: React.FC<NavbarProps> = ({
               <Image 
                 src="/tourhelpdesk.png" 
                 alt="Tour Help Desk logo" 
-                width={160}
-                height={40}
+                width={130}
+                height={32}
                 priority
-                className={`object-contain h-7 sm:h-8 md:h-10 w-auto ${isTripHeader || darkMode ? 'brightness-110' : ''}`}
+                className={`object-contain h-6 sm:h-7 md:h-8 w-auto ${isTripHeader || darkMode ? 'brightness-110' : ''}`}
               />
             </div>
-            <span className={`hidden min-[380px]:inline text-sm sm:text-lg md:text-xl font-extrabold tracking-tight truncate ml-1 ${
+            <span className={`hidden min-[380px]:inline text-xs sm:text-base md:text-lg font-extrabold tracking-tight truncate ml-0.5 ${
               isTripHeader ? 'text-white' : 'text-slate-800 dark:text-white'
             }`}>
               Tour Help Desk
             </span>
           </div>
 
-          {/* Inline Navigation Tabs (Desktop) */}
-          <div className="hidden lg:flex items-center gap-6 ml-2 text-sm font-semibold">
-            <button 
-              onClick={onHotelsClick} 
-              className={`transition-all relative py-1 cursor-pointer ${
-                activeView === 'hotels'
-                  ? (isTripHeader ? 'text-white font-extrabold border-b-2 border-white pb-0.5' : 'text-blue-600 font-extrabold border-b-2 border-blue-600 pb-0.5')
-                  : (isTripHeader ? 'text-slate-200 hover:text-white' : 'text-slate-700 dark:text-slate-200')
-              }`}
-            >
-              Hotels & Homes
-            </button>
 
-            <button 
-              onClick={onLogoClick} 
-              className={`transition-all relative py-1 cursor-pointer ${
-                activeView === 'flights' || activeView === 'home'
-                  ? (isTripHeader ? 'text-white font-extrabold border-b-2 border-white pb-0.5' : 'text-blue-600 font-extrabold border-b-2 border-blue-600 pb-0.5')
-                  : (isTripHeader ? 'text-slate-200 hover:text-white' : 'text-slate-700 dark:text-slate-200')
-              }`}
-            >
-              Flights
-            </button>
-
-            <button 
-              onClick={onOffersClick} 
-              className={`transition-all hover:text-white ${isTripHeader ? 'text-slate-200 hover:text-white' : 'text-slate-700 dark:text-slate-200'}`}
-            >
-              Flight + Hotel
-            </button>
-
-            <button 
-              onClick={() => {}} 
-              className={`transition-all hover:text-white ${isTripHeader ? 'text-slate-200 hover:text-white' : 'text-slate-700 dark:text-slate-200'}`}
-            >
-              Cars
-            </button>
-
-            <button 
-              onClick={() => setIsSidebarOpen(true)} 
-              className={`transition-all font-bold ${isTripHeader ? 'text-slate-200 hover:text-white' : 'text-slate-700 dark:text-slate-200'}`}
-            >
-              •••
-            </button>
-          </div>
 
         </div>
 
@@ -279,13 +285,54 @@ const Navbar: React.FC<NavbarProps> = ({
             <span>App</span>
           </div>
 
-          {/* Currency Pill */}
-          <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors cursor-pointer text-xs font-bold ${
-            isTripHeader ? 'text-white hover:bg-white/10' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}>
-            <span className="text-sm">🇮🇳</span>
-            <span className="opacity-40">|</span>
-            <span className="font-extrabold tracking-wider">INR</span>
+          {/* Multi-Currency Dropdown Pill (Default USD) */}
+          <div className="relative" ref={currencyRef}>
+            <button
+              type="button"
+              onClick={() => setShowCurrencyMenu(!showCurrencyMenu)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-xs font-bold cursor-pointer border ${
+                isTripHeader
+                  ? 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                  : 'bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-200/80 dark:hover:bg-slate-700'
+              }`}
+              title="Select Currency"
+            >
+              <span className="text-sm">{selectedCurrency.flag}</span>
+              <span className="opacity-40">|</span>
+              <span className="font-black tracking-wide">{selectedCurrency.code} ({selectedCurrency.symbol})</span>
+              <svg className={`w-3 h-3 transition-transform ${showCurrencyMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Currency Menu Dropdown */}
+            {showCurrencyMenu && (
+              <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Select Currency
+                </div>
+                <div className="max-h-60 overflow-y-auto">
+                  {CURRENCIES.map((curr) => (
+                    <button
+                      key={curr.code}
+                      type="button"
+                      onClick={() => handleSelectCurrency(curr)}
+                      className={`w-full px-3.5 py-2 flex items-center justify-between text-xs font-bold transition-colors cursor-pointer text-left ${
+                        selectedCurrency.code === curr.code
+                          ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{curr.flag}</span>
+                        <span>{curr.name}</span>
+                      </div>
+                      <span className="font-extrabold text-slate-400 dark:text-slate-500">{curr.code} ({curr.symbol})</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Support Link */}
@@ -388,11 +435,18 @@ const Navbar: React.FC<NavbarProps> = ({
           </button>
           
           <div 
-            className="flex items-center cursor-pointer select-none"
+            className="flex items-center gap-2 cursor-pointer select-none group min-w-0"
             onClick={() => { onLogoClick(); setIsSidebarOpen(false); }}
           >
-            <span className="text-xl sm:text-2xl font-black tracking-tight text-[#0F172A] dark:text-white">
-              tour<span className="text-[#E8A11A]">.</span>helpdesk
+            <Image 
+              src="/tourhelpdesk.png" 
+              alt="Tour Help Desk logo" 
+              width={120}
+              height={30}
+              className="object-contain h-7 w-auto"
+            />
+            <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-800 dark:text-white truncate">
+              Tour Help Desk
             </span>
           </div>
         </div>
@@ -412,7 +466,10 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <button 
-              onClick={() => { onLogoClick(); setIsSidebarOpen(false); }}
+              onClick={() => {
+                router.push('/flights');
+                setIsSidebarOpen(false);
+              }}
               className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-left group transition-colors cursor-pointer"
             >
               <svg className="w-5 h-5 text-[#0F172A]/70 dark:text-slate-400 group-hover:text-[#E8A11A] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">

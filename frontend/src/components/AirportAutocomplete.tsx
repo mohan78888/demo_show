@@ -109,6 +109,7 @@ interface AirportAutocompleteProps {
   onChange?: (val: string, airport?: Airport) => void;
   required?: boolean;
   flat?: boolean;
+  variant?: 'default' | 'mmt';
   className?: string;
   defaultCode?: string;
 }
@@ -120,6 +121,7 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
   onChange,
   required = false,
   flat = false,
+  variant = 'default',
   className = '',
   defaultCode
 }) => {
@@ -135,6 +137,7 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
   );
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync externalValue prop changes if provided
   useEffect(() => {
@@ -144,6 +147,20 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
       setSelectedCode(code);
     }
   }, [externalValue]);
+
+  // Current matched airport
+  const currentAirport = useMemo(() => {
+    if (selectedCode) {
+      return AIRPORTS_DATA.find(a => a.code.toLowerCase() === selectedCode.toLowerCase()) || null;
+    }
+    const resolved = resolveIataCode(query);
+    return AIRPORTS_DATA.find(a => a.code.toLowerCase() === resolved.toLowerCase()) || null;
+  }, [selectedCode, query]);
+
+  const cityName = currentAirport ? currentAirport.city.split('/')[0].trim() : (query ? query.split(',')[0].trim() : placeholder);
+  const airportSubtitle = currentAirport 
+    ? `${currentAirport.code}, ${currentAirport.name}`
+    : (query || 'Enter City or Airport');
 
   // Filter airports based on query search term
   const filteredAirports = useMemo(() => {
@@ -199,20 +216,55 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
 
   return (
     <div className={`relative ${className}`} ref={containerRef}>
-      {/* Visible Display Input (User sees "Delhi, India (DEL)" or types search term) */}
-      <input
-        type="text"
-        placeholder={placeholder}
-        required={required}
-        autoComplete="off"
-        className={flat 
-          ? "w-full bg-transparent border-0 outline-none p-0 text-slate-800 dark:text-white font-extrabold text-xs sm:text-[15px] placeholder:text-slate-400 focus:ring-0 focus:outline-none"
-          : "w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-700 transition-all outline-none font-bold text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400"
-        }
-        value={query}
-        onChange={handleInputChange}
-        onFocus={() => setIsOpen(true)}
-      />
+      {variant === 'mmt' ? (
+        <div 
+          onClick={() => {
+            setIsOpen(true);
+            setTimeout(() => inputRef.current?.focus(), 50);
+          }}
+          className="cursor-pointer select-none"
+        >
+          {isOpen ? (
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder={placeholder}
+              required={required}
+              autoComplete="off"
+              className="w-full bg-transparent border-0 outline-none p-0 text-slate-900 dark:text-white font-black text-xl sm:text-2xl md:text-3xl tracking-tight focus:ring-0 focus:outline-none"
+              value={query}
+              onChange={handleInputChange}
+              onFocus={() => setIsOpen(true)}
+              autoFocus
+            />
+          ) : (
+            <div className="min-w-0">
+              <h4 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate leading-tight">
+                {cityName}
+              </h4>
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                {airportSubtitle}
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Standard Flat / Default Input */
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder={placeholder}
+          required={required}
+          autoComplete="off"
+          className={flat 
+            ? "w-full bg-transparent border-0 outline-none p-0 text-slate-800 dark:text-white font-extrabold text-xs sm:text-[15px] placeholder:text-slate-400 focus:ring-0 focus:outline-none"
+            : "w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-700 transition-all outline-none font-bold text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400"
+          }
+          value={query}
+          onChange={handleInputChange}
+          onFocus={() => setIsOpen(true)}
+        />
+      )}
 
       {/* Hidden Input for Form Submission: ALWAYS SENDS ONLY THE 3-LETTER IATA CODE (e.g. DEL, BOM) */}
       <input 

@@ -179,7 +179,7 @@ export const CarRentals: React.FC<CarRentalsProps> = ({ onSelectCity }) => {
   };
 
   return (
-    <section className="w-full bg-white dark:bg-slate-950 py-10 md:py-14 transition-colors duration-300">
+    <section className="w-full bg-white dark:bg-slate-950 py-6 md:py-9 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         
         {/* Section Heading & Subheading wrapped with ScrollReveal */}

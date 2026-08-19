@@ -7,6 +7,7 @@ import Footer from './Footer';
 import TrustBar from './TrustBar';
 import { SearchParams } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { CONTACT_INFO } from '../constants/config';
 
 interface PromoLandingPageProps {
   onSearch: (params: SearchParams) => void;
@@ -80,9 +81,9 @@ const PromoLandingPage: React.FC<PromoLandingPageProps> = ({
                 )}
               </button>
 
-             <a href="tel:18887918007" className="flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-4 py-2 rounded-lg font-bold text-sm hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors">
+             <a href={CONTACT_INFO.HOTLINE_TEL} className="flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-4 py-2 rounded-lg font-bold text-sm hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors">
                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-               <span className="hidden sm:inline">1-888-791-8007</span>
+               <span className="hidden sm:inline">{CONTACT_INFO.HOTLINE_DISPLAY}</span>
              </a>
           </div>
         </div>

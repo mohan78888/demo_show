@@ -16,7 +16,13 @@ export interface Flight {
   baggage?: string;
   refundable?: boolean;
   bookingLink?: string;
+  flightKey?: string;
+  fareId?: string;
+  seatsAvailable?: string;
+  repriced?: boolean;
+  searchKey?: string;
 }
+
 
 export interface Hotel {
   id: string;
@@ -45,4 +51,53 @@ export interface Offer {
   code: string;
   color: string;
   image: string;
+}
+
+export interface SSRItem {
+  code: string;
+  key: string;
+  name: string;
+  desc: string;
+  amount: number;
+  currency: string;
+  type: string;
+}
+
+export interface SSRGroup {
+  meals: SSRItem[];
+  baggage: SSRItem[];
+  wheelchair: SSRItem[];
+  other: SSRItem[];
+}
+
+export interface PassengerInfo {
+  paxId: number;
+  paxType: number; // 0=Adult, 1=Child, 2=Infant
+  title: string;
+  firstName: string;
+  lastName: string;
+  gender: number; // 0=Male, 1=Female
+  dob?: string;
+  passportNumber?: string;
+  passportCountry?: string;
+  passportExpiry?: string;
+  nationality?: string;
+  pancardNumber?: string;
+}
+
+export interface TempBookingResult {
+  success: boolean;
+  bookingRefNo?: string;
+  totalAmount?: number;
+  message: string;
+}
+
+export interface TicketingResult {
+  success: boolean;
+  bookingRefNo?: string;
+  airlinePnr?: string;
+  ticketNumber?: string;
+  airlineCode?: string;
+  status?: string;
+  message: string;
 }

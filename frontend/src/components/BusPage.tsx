@@ -3,6 +3,16 @@
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import BusSearchForm from './forms/BusSearchForm';
+import { 
+  RedBusGraphic, 
+  PrimoOfferGraphic, 
+  BankBadgeGraphic, 
+  TrainGraphic, 
+  HotelGraphic, 
+  FlightGraphic, 
+  CabGraphic 
+} from './ui/OfferGraphics';
 import { 
   Bus, 
   MapPin, 
@@ -28,7 +38,12 @@ import {
   Tag,
   Clock,
   Gift,
-  Ticket
+  Ticket,
+  Home,
+  Bookmark,
+  FileText,
+  Settings,
+  User
 } from 'lucide-react';
 
 interface BusSearchForm {
@@ -397,97 +412,14 @@ export default function BusPage() {
             Search over 100,000+ routes across top countries with our best-price guarantee & 24/7 helpline.
           </motion.p>
 
-          {/* Multi-Field Search Card */}
-          <motion.div variants={scrollRevealVariants} className="mt-4 sm:mt-6 max-w-5xl mx-auto bg-white dark:bg-slate-900 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 text-left">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 items-center">
-              
-              {/* From */}
-              <div className="md:col-span-3 flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
-                <MapPin className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <label className="block text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-slate-400">From</label>
-                  <input 
-                    type="text" 
-                    value={searchForm.from} 
-                    onChange={(e) => setSearchForm({...searchForm, from: e.target.value})}
-                    className="w-full bg-transparent font-bold text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none truncate"
-                  />
-                </div>
-              </div>
-
-              {/* Swap Button */}
-              <div className="md:col-span-1 flex justify-center py-0.5 sm:py-0">
-                <button 
-                  onClick={handleSwap}
-                  type="button"
-                  aria-label="Swap Locations"
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 transition-all hover:rotate-180 duration-300 shadow-sm"
-                >
-                  <ArrowLeftRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </button>
-              </div>
-
-              {/* To */}
-              <div className="md:col-span-3 flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
-                <MapPin className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <label className="block text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-slate-400">To</label>
-                  <input 
-                    type="text" 
-                    value={searchForm.to} 
-                    onChange={(e) => setSearchForm({...searchForm, to: e.target.value})}
-                    className="w-full bg-transparent font-bold text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none truncate"
-                  />
-                </div>
-              </div>
-
-              {/* Date */}
-              <div className="md:col-span-2 flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
-                <Calendar className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <label className="block text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Departure</label>
-                  <input 
-                    type="date" 
-                    value={searchForm.date} 
-                    onChange={(e) => setSearchForm({...searchForm, date: e.target.value})}
-                    className="w-full bg-transparent font-bold text-slate-900 dark:text-white text-xs focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Search Button */}
-              <div className="md:col-span-3">
-                <button 
-                  type="button"
-                  className="w-full h-full min-h-[44px] md:min-h-[52px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Search className="w-4 h-4" />
-                  Search Buses
-                </button>
-              </div>
-
-            </div>
-
-            {/* Quick Filter Chips */}
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mr-1">Quick Filters:</span>
-              {["AC Sleeper", "Volvo Luxury", "Express Coach", "Inter-Country"].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => {
-                    setActiveFilter(filter);
-                    setSearchForm(prev => ({ ...prev, busType: filter }));
-                  }}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                    activeFilter === filter
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
+          <motion.div variants={scrollRevealVariants}>
+            <BusSearchForm
+              searchForm={searchForm}
+              onChange={setSearchForm}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              onSwap={handleSwap}
+            />
           </motion.div>
         </motion.div>
       </section>
@@ -1058,117 +990,4 @@ export default function BusPage() {
   );
 }
 
-/* Graphic Illustrations matching RedBus reference design */
-function RedBusGraphic() {
-  return (
-    <div className="w-24 h-14 relative shrink-0">
-      <svg className="w-full h-full filter drop-shadow-md" viewBox="0 0 120 70" fill="none">
-        {/* Bus Body */}
-        <path d="M12 22 C12 14, 22 10, 38 10 L102 10 C110 10, 115 14, 115 22 L115 48 C115 54, 110 57, 100 57 L18 57 C12 57, 12 52, 12 48 Z" fill="#EF4444" />
-        {/* Front Windshield */}
-        <path d="M14 20 C14 15, 20 12, 30 12 L34 12 L34 30 L14 30 Z" fill="#93C5FD" opacity="0.9" />
-        {/* Side Windows */}
-        <path d="M38 13 L52 13 L52 26 L38 26 Z" fill="#1E3A8A" opacity="0.75" />
-        <path d="M55 13 L69 13 L69 26 L55 26 Z" fill="#1E3A8A" opacity="0.75" />
-        <path d="M72 13 L86 13 L86 26 L72 26 Z" fill="#1E3A8A" opacity="0.75" />
-        <path d="M89 13 L103 13 L103 26 L89 26 Z" fill="#1E3A8A" opacity="0.75" />
-        {/* Headlight */}
-        <circle cx="18" cy="42" r="3" fill="#FEF08A" />
-        {/* Wheels */}
-        <circle cx="34" cy="57" r="7" fill="#0F172A" />
-        <circle cx="34" cy="57" r="3.5" fill="#94A3B8" />
-        <circle cx="88" cy="57" r="7" fill="#0F172A" />
-        <circle cx="88" cy="57" r="3.5" fill="#94A3B8" />
-      </svg>
-    </div>
-  );
-}
 
-function PrimoOfferGraphic() {
-  return (
-    <div className="relative shrink-0 flex items-center justify-center">
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl p-2 shadow-md border border-amber-300 flex flex-col items-center justify-center text-center w-24 h-14">
-        <span className="text-[10px] font-black text-indigo-950 uppercase tracking-tighter leading-none">Primo</span>
-        <span className="text-xs font-black text-blue-600 uppercase tracking-tight leading-none mt-0.5">Monsoon</span>
-        <span className="text-[8px] font-extrabold text-amber-600 uppercase tracking-widest leading-none mt-0.5">Offer</span>
-      </div>
-    </div>
-  );
-}
-
-function BankBadgeGraphic() {
-  return (
-    <div className="relative shrink-0 flex items-center justify-center">
-      <div className="bg-white rounded-xl p-1.5 shadow-md border border-rose-200 flex items-center gap-1.5 w-24 h-12">
-        <div className="w-5 h-5 rounded bg-red-700 text-white flex items-center justify-center font-black text-[9px]">
-          IDFC
-        </div>
-        <div className="flex flex-col leading-none">
-          <span className="text-[9px] font-black text-slate-900">IDFC FIRST</span>
-          <span className="text-[7px] font-bold text-slate-500 uppercase mt-0.5">Bank Card</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TrainGraphic() {
-  return (
-    <div className="w-24 h-14 relative shrink-0">
-      <svg className="w-full h-full filter drop-shadow-md" viewBox="0 0 120 70" fill="none">
-        <path d="M10 25 C10 18, 20 12, 40 12 L105 12 C112 12, 115 18, 115 25 L115 48 C115 54, 110 56, 100 56 L10 56 Z" fill="#2563EB" />
-        <path d="M12 24 L35 24 L35 34 L12 34 Z" fill="#93C5FD" opacity="0.9" />
-        <path d="M42 16 L60 16 L60 30 L42 30 Z" fill="#1E3A8A" opacity="0.75" />
-        <path d="M65 16 L83 16 L83 30 L65 30 Z" fill="#1E3A8A" opacity="0.75" />
-        <path d="M88 16 L106 16 L106 30 L88 30 Z" fill="#1E3A8A" opacity="0.75" />
-        <path d="M10 40 L115 40 L115 44 L10 44 Z" fill="#F59E0B" />
-        <circle cx="28" cy="56" r="6" fill="#0F172A" />
-        <circle cx="68" cy="56" r="6" fill="#0F172A" />
-        <circle cx="98" cy="56" r="6" fill="#0F172A" />
-      </svg>
-    </div>
-  );
-}
-
-function HotelGraphic() {
-  return (
-    <div className="w-24 h-14 relative shrink-0 flex items-center justify-center">
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl p-2 shadow-md border border-emerald-300 flex flex-col items-center justify-center text-center w-24 h-14">
-        <span className="text-[10px] font-black text-emerald-800 uppercase tracking-tighter leading-none">Hotel & Stay</span>
-        <span className="text-xs font-black text-emerald-600 uppercase tracking-tight leading-none mt-0.5">30% OFF</span>
-        <span className="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest leading-none mt-0.5">Luxury Stay</span>
-      </div>
-    </div>
-  );
-}
-
-function FlightGraphic() {
-  return (
-    <div className="w-24 h-14 relative shrink-0">
-      <svg className="w-full h-full filter drop-shadow-md" viewBox="0 0 120 70" fill="none">
-        <path d="M15 35 Q40 25 70 30 L105 15 L108 22 L80 37 L110 40 L108 45 L72 42 L45 58 L38 56 L50 40 L15 35 Z" fill="#4F46E5" />
-        <path d="M75 28 L95 18 L96 23 L80 34 Z" fill="#818CF8" />
-        <circle cx="35" cy="34" r="2" fill="#FFFFFF" />
-        <circle cx="45" cy="35" r="2" fill="#FFFFFF" />
-        <circle cx="55" cy="36" r="2" fill="#FFFFFF" />
-      </svg>
-    </div>
-  );
-}
-
-function CabGraphic() {
-  return (
-    <div className="w-24 h-14 relative shrink-0">
-      <svg className="w-full h-full filter drop-shadow-md" viewBox="0 0 120 70" fill="none">
-        <path d="M20 32 L35 18 C38 15, 45 14, 60 14 L80 14 C90 14, 95 18, 100 24 L108 34 L112 36 C115 38, 115 44, 110 48 L15 48 C10 48, 10 42, 12 36 Z" fill="#EAB308" />
-        <path d="M38 18 L55 18 L55 30 L28 30 Z" fill="#1E293B" opacity="0.85" />
-        <path d="M60 18 L78 18 L88 30 L60 30 Z" fill="#1E293B" opacity="0.85" />
-        <rect x="52" y="9" width="16" height="5" rx="1.5" fill="#0F172A" />
-        <circle cx="32" cy="48" r="7" fill="#0F172A" />
-        <circle cx="32" cy="48" r="3.5" fill="#94A3B8" />
-        <circle cx="88" cy="48" r="7" fill="#0F172A" />
-        <circle cx="88" cy="48" r="3.5" fill="#94A3B8" />
-      </svg>
-    </div>
-  );
-}
