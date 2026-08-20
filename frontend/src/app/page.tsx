@@ -7,7 +7,6 @@ import Sidebar from '../components/Sidebar';
 import Hero from '../components/Hero';
 import MobileServiceGrid from '../components/ui/MobileServiceGrid';
 import Offers from '../components/Offers';
-import CheapestFlights from '../components/CheapestFlights';
 import CruiseDestinations from '../components/CruiseDestinations';
 import TopHotels from '../components/TopHotels';
 import CarRentals from '../components/CarRentals';
@@ -310,7 +309,6 @@ function HomeContent() {
               {/* HOME PAGE CARDS SECTION */}
               <Offers onSeeAll={() => router.push('/offers')} />
               <CruiseDestinations />
-              <CheapestFlights />
               <TopHotels />
               <CarRentals />
               <TrendingHolidays />

@@ -10,6 +10,7 @@ import authRoutes from './routes/authRoutes.js';
 import flightRoutes from './routes/flightRoutes.js';
 import hotelRoutes from './routes/hotelRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import currencyRoutes from './routes/currencyRoutes.js';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api/hotels', hotelRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/currency', currencyRoutes);
 
 // Protected legacy profile alias endpoint
 app.get('/api/user/profile', (_req: Request, res: Response) => {

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { authService } from '../services/authService';
+import { CURRENCIES, getSavedCurrency, getExchangeRates, CurrencyOption } from '../lib/currency';
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -20,24 +21,6 @@ interface NavbarProps {
 }
 
 type MobileCategory = 'hotels' | 'flights' | 'packages' | 'cars' | 'cruises';
-
-export interface CurrencyOption {
-  code: string;
-  symbol: string;
-  name: string;
-  flag: string;
-}
-
-export const CURRENCIES: CurrencyOption[] = [
-  { code: 'USD', symbol: '$', name: 'US Dollar', flag: '🇺🇸' },
-  { code: 'EUR', symbol: '€', name: 'Euro', flag: '🇪🇺' },
-  { code: 'GBP', symbol: '£', name: 'British Pound', flag: '🇬🇧' },
-  { code: 'INR', symbol: '₹', name: 'Indian Rupee', flag: '🇮🇳' },
-  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', flag: '🇨🇦' },
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', flag: '🇦🇺' },
-  { code: 'AED', symbol: 'AED', name: 'UAE Dirham', flag: '🇦🇪' },
-  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar', flag: '🇸🇬' },
-];
 
 const Navbar: React.FC<NavbarProps> = ({ 
   onLoginClick, 
@@ -56,16 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({
   const [user, setUser] = useState<any>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyOption>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('preferred_currency');
-      if (saved) {
-        const found = CURRENCIES.find(c => c.code === saved);
-        if (found) return found;
-      }
-    }
-    return CURRENCIES[0]; // USD Default
-  });
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyOption>(getSavedCurrency);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hideMobileCategoryStrip, setHideMobileCategoryStrip] = useState(false);
@@ -73,6 +47,9 @@ const Navbar: React.FC<NavbarProps> = ({
   const currencyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Fetch live rates from CurrencyFreaks via backend on load
+    getExchangeRates();
+
     const handleOutsideClick = (e: MouseEvent) => {
       if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
         setShowCurrencyMenu(false);
@@ -88,7 +65,7 @@ const Navbar: React.FC<NavbarProps> = ({
     if (typeof window !== 'undefined') {
       localStorage.setItem('preferred_currency', curr.code);
       localStorage.setItem('preferred_currency_symbol', curr.symbol);
-      window.dispatchEvent(new Event('currency_change'));
+      window.dispatchEvent(new CustomEvent('currency_change', { detail: curr }));
     }
   };
 
@@ -248,32 +225,30 @@ const Navbar: React.FC<NavbarProps> = ({
 
           {/* Logo */}
           <div 
-            className="flex items-center gap-2 cursor-pointer group shrink-0 min-w-0"
+            className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group shrink-0 min-w-0"
             onClick={() => { onLogoClick(); setIsSidebarOpen(false); }}
           >
-            <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+            <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105 shrink-0">
               <Image 
                 src="/tourhelpdesk.png" 
                 alt="Tour Help Desk logo" 
-                width={130}
-                height={32}
+                width={120}
+                height={30}
                 priority
-                className={`object-contain h-6 sm:h-7 md:h-8 w-auto ${isTripHeader || darkMode ? 'brightness-110' : ''}`}
+                className={`object-contain h-5.5 sm:h-7 md:h-8 w-auto ${isTripHeader || darkMode ? 'brightness-110' : ''}`}
               />
             </div>
-            <span className={`hidden min-[380px]:inline text-xs sm:text-base md:text-lg font-extrabold tracking-tight truncate ml-0.5 ${
+            <span className={`hidden md:inline text-xs sm:text-base md:text-lg font-extrabold tracking-tight truncate ml-0.5 ${
               isTripHeader ? 'text-white' : 'text-slate-800 dark:text-white'
             }`}>
               Tour Help Desk
             </span>
           </div>
 
-
-
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2 sm:gap-4 lg:gap-5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-4 lg:gap-5 shrink-0">
           
           {/* App Link */}
           <div className={`hidden md:flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer ${
@@ -290,24 +265,24 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => setShowCurrencyMenu(!showCurrencyMenu)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-xs font-bold cursor-pointer border ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg transition-all text-[11px] sm:text-xs font-bold cursor-pointer border ${
                 isTripHeader
                   ? 'bg-white/10 text-white border-white/20 hover:bg-white/20'
                   : 'bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-200/80 dark:hover:bg-slate-700'
               }`}
               title="Select Currency"
             >
-              <span className="text-sm">{selectedCurrency.flag}</span>
-              <span className="opacity-40">|</span>
-              <span className="font-black tracking-wide">{selectedCurrency.code} ({selectedCurrency.symbol})</span>
-              <svg className={`w-3 h-3 transition-transform ${showCurrencyMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <span className="text-xs sm:text-sm">{selectedCurrency.flag}</span>
+              <span className="opacity-40 hidden sm:inline">|</span>
+              <span className="font-black tracking-tight">{selectedCurrency.code}</span>
+              <svg className={`w-2.5 h-2.5 sm:w-3 sm:h-3 transition-transform ${showCurrencyMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
             {/* Currency Menu Dropdown */}
             {showCurrencyMenu && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 top-full mt-2 w-48 sm:w-52 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
                   Select Currency
                 </div>
@@ -317,17 +292,17 @@ const Navbar: React.FC<NavbarProps> = ({
                       key={curr.code}
                       type="button"
                       onClick={() => handleSelectCurrency(curr)}
-                      className={`w-full px-3.5 py-2 flex items-center justify-between text-xs font-bold transition-colors cursor-pointer text-left ${
+                      className={`w-full px-3 py-2 flex items-center justify-between text-xs font-bold transition-colors cursor-pointer text-left ${
                         selectedCurrency.code === curr.code
                           ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
                           : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-base">{curr.flag}</span>
+                        <span className="text-sm sm:text-base">{curr.flag}</span>
                         <span>{curr.name}</span>
                       </div>
-                      <span className="font-extrabold text-slate-400 dark:text-slate-500">{curr.code} ({curr.symbol})</span>
+                      <span className="font-extrabold text-slate-400 dark:text-slate-500">{curr.code}</span>
                     </button>
                   ))}
                 </div>
@@ -348,7 +323,7 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Theme Toggle */}
           <button
             onClick={toggleDarkMode}
-            className={`p-1.5 sm:p-2 rounded-xl transition-all active:scale-95 cursor-pointer ${
+            className={`p-1 sm:p-2 rounded-lg sm:rounded-xl transition-all active:scale-95 cursor-pointer shrink-0 ${
               isTripHeader
                 ? 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -356,24 +331,24 @@ const Navbar: React.FC<NavbarProps> = ({
             aria-label="Toggle Theme"
           >
             {darkMode ? (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 3v1m0 16v1m9-9h1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 3v1m0 16v1m9-9h1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
             ) : (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             )}
           </button>
 
           {/* Custom Sign In / Account Dropdown */}
-          <div className="relative">
+          <div className="relative shrink-0">
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600 text-white font-extrabold text-xs shadow-md hover:bg-blue-700 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-blue-600 text-white font-extrabold text-[11px] sm:text-xs shadow-md hover:bg-blue-700 transition-all cursor-pointer"
                 >
-                  <div className="w-6 h-6 rounded-full bg-white text-blue-600 font-black flex items-center justify-center text-xs">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-blue-600 font-black flex items-center justify-center text-[10px] sm:text-xs">
                     {(user.firstName || user.name || 'U').charAt(0).toUpperCase()}
                   </div>
-                  <span>{user.firstName || user.name || 'Account'}</span>
+                  <span className="hidden min-[380px]:inline">{user.firstName || user.name || 'Account'}</span>
                 </button>
 
                 {showUserMenu && (
@@ -396,11 +371,12 @@ const Navbar: React.FC<NavbarProps> = ({
                 onClick={onLoginClick}
                 className={`${
                   isTripHeader 
-                    ? 'bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-xs px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all active:scale-95 cursor-pointer'
-                    : 'bg-gold-gradient hover:opacity-95 text-[#0F172A] font-extrabold text-xs px-4 py-2 rounded-lg transition-all active:scale-95 cursor-pointer shadow-sm'
+                    ? 'bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-[11px] sm:text-xs px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap'
+                    : 'bg-gold-gradient hover:opacity-95 text-[#0F172A] font-extrabold text-[11px] sm:text-xs px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg transition-all active:scale-95 cursor-pointer shadow-sm whitespace-nowrap'
                 }`}
               >
-                Sign In/register
+                <span className="sm:hidden">Sign In</span>
+                <span className="hidden sm:inline">Sign In / Register</span>
               </button>
             )}
           </div>

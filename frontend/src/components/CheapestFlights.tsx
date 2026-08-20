@@ -1,9 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Carousel from './ui/Carousel';
+import { convertINR, getSavedCurrency, CurrencyOption } from '../lib/currency';
 
 export interface CheapestFlightCard {
   id: string;
@@ -213,92 +214,112 @@ interface CheapestFlightsProps {
 }
 
 const CheapestFlights: React.FC<CheapestFlightsProps> = ({ onSelectFlight }) => {
+  const [currency, setCurrency] = useState<CurrencyOption>(getSavedCurrency);
+
+  useEffect(() => {
+    const handleCurrencyChange = () => setCurrency(getSavedCurrency());
+    window.addEventListener('currency_change', handleCurrencyChange);
+    return () => window.removeEventListener('currency_change', handleCurrencyChange);
+  }, []);
+
   return (
     <section className="py-6 md:py-9 bg-white dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         <Carousel
-          title="Cheapest Flights"
-          subtitle="Book the cheapest flights to top destinations around the world."
-          scrollAmount={350}
+          title="Cheapest Flights Every Day"
+          subtitle="Real-time lowest airline rates updated every 60 seconds with exclusive Tour Help Desk discounts."
+          scrollAmount={340}
         >
-          {CHEAPEST_FLIGHTS.map((flight, index) => (
-            <motion.div
-              key={flight.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.5), ease: "easeOut" }}
-              whileHover={{ y: -6, scale: 1.015 }}
-              className="snap-start shrink-0 cursor-pointer"
-              onClick={() => {
-                const searchInput = document.querySelector('input[name="from"]');
-                if (searchInput instanceof HTMLElement) {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                  searchInput.focus();
-                } else if (onSelectFlight) {
-                  onSelectFlight(flight.name);
-                }
-              }}
-            >
-              <div className="w-[285px] sm:w-[325px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-700 overflow-hidden shadow-[0_8px_24px_rgba(15,23,42,0.08)] hover:shadow-xl dark:hover:shadow-slate-900/50 transition-all duration-300 flex flex-col justify-between group">
-                
-                {/* Destination Image Header */}
-                <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+          {CHEAPEST_FLIGHTS.map((flight) => {
+            const convertedPrice = convertINR(flight.rawPrice * 87.5, currency.code);
+
+            return (
+              <motion.div
+                key={flight.id}
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => {
+                  const searchInput = document.querySelector('input[name="from"]');
+                  if (searchInput instanceof HTMLElement) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    searchInput.focus();
+                  } else if (onSelectFlight) {
+                    onSelectFlight(flight.name);
+                  }
+                }}
+                className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-[0_4px_20px_rgba(15,23,42,0.06)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.12)] dark:shadow-none border border-slate-100 dark:border-slate-800/80 group cursor-pointer flex flex-col h-full select-none"
+              >
+                {/* Image Container with Badges */}
+                <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <Image
                     src={flight.image}
                     alt={flight.name}
                     fill
-                    sizes="(max-width: 640px) 285px, 325px"
-                    className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                    sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, 360px"
+                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-                  {/* Direct Route Tag */}
-                  <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 text-white bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold border border-white/20">
-                    <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                  {/* Route Pill */}
+                  <div className="absolute top-3.5 left-3.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-black text-slate-800 dark:text-white shadow-sm flex items-center gap-1.5 border border-white/20">
+                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
                     <span>{flight.route}</span>
+                  </div>
+
+                  {/* Optional Tag Badge */}
+                  {flight.badge && (
+                    <div className="absolute top-3.5 right-3.5 bg-[#E8A11A] text-slate-900 font-extrabold text-[10px] uppercase px-2.5 py-1 rounded-full shadow-md tracking-wider">
+                      {flight.badge}
+                    </div>
+                  )}
+
+                  {/* Dates Overlay */}
+                  <div className="absolute bottom-3 left-3.5 text-white/90 text-xs font-semibold flex items-center gap-1.5 drop-shadow-md">
+                    <svg className="w-3.5 h-3.5 text-[#E8A11A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>{flight.dates}</span>
                   </div>
                 </div>
 
                 {/* Card Content */}
-                <div className="p-4 flex flex-col justify-between flex-1">
-                  
-                  {/* Typical Cost Range & Price Gauge Indicator */}
-                  <div className="flex items-center justify-between gap-2 mb-3 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                      <span>Similar flights: <strong className="text-slate-700 dark:text-slate-200 font-semibold">{flight.typicalCost}</strong></span>
-                      <span className="cursor-help text-slate-400" title="Based on historical search data">ⓘ</span>
-                    </div>
+                <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between gap-3">
+                  <div>
+                    {/* Market Comparison Row */}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                        <span>Similar flights: <strong className="text-slate-700 dark:text-slate-200 font-semibold">{flight.typicalCost}</strong></span>
+                        <span className="cursor-help text-slate-400" title="Based on historical search data">ⓘ</span>
+                      </div>
 
-                    {/* Price Gauge Bar */}
-                    <div className="flex flex-col items-center shrink-0">
-                      <div className="w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[5px] border-t-emerald-600 dark:border-t-emerald-400 mb-0.5 animate-bounce"></div>
-                      <div className="flex h-1.5 w-7 rounded-full overflow-hidden gap-[1px]">
-                        <div className="w-1/3 bg-emerald-500 rounded-l-full"></div>
-                        <div className="w-1/3 bg-amber-400"></div>
-                        <div className="w-1/3 bg-rose-500 rounded-r-full"></div>
+                      {/* Price Gauge Bar */}
+                      <div className="flex flex-col items-center shrink-0">
+                        <div className="w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[5px] border-t-emerald-600 dark:border-t-emerald-400 mb-0.5 animate-bounce"></div>
+                        <div className="flex h-1.5 w-7 rounded-full overflow-hidden gap-[1px]">
+                          <div className="w-1/3 bg-emerald-500 rounded-l-full"></div>
+                          <div className="w-1/3 bg-amber-400"></div>
+                          <div className="w-1/3 bg-rose-500 rounded-r-full"></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Flight Name & Details */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
-                        {flight.name}
-                      </h3>
-                    </div>
-
-                    {/* Price Box */}
-                    <div className="text-right shrink-0">
-                      <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight group-hover:scale-105 transition-transform">
-                        {flight.price}
+                    {/* Flight Name & Details */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
+                          {flight.name}
+                        </h3>
                       </div>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase tracking-wider mt-0.5">
-                        {flight.tripType}
-                      </span>
+
+                      {/* Price Box */}
+                      <div className="text-right shrink-0">
+                        <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight group-hover:scale-105 transition-transform">
+                          From {currency.symbol}{convertedPrice.toLocaleString()}
+                        </div>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase tracking-wider mt-0.5">
+                          {flight.tripType}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -313,12 +334,10 @@ const CheapestFlights: React.FC<CheapestFlightsProps> = ({ onSelectFlight }) => 
                       Book Now →
                     </span>
                   </div>
-
                 </div>
-
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </Carousel>
       </div>
     </section>

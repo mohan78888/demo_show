@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Flight, SSRGroup, SSRItem, PassengerInfo } from '../types';
 import { flightService } from '../services/flightService';
+import { convertINR, getSavedCurrency, CurrencyOption } from '../lib/currency';
 
 interface FlightDetailsProps {
   flight: Flight;
@@ -13,6 +14,14 @@ interface FlightDetailsProps {
 const FlightDetails: React.FC<FlightDetailsProps> = ({ flight, onBack }) => {
   const [activeTab, setActiveTab] = useState<'fare' | 'baggage' | 'services' | 'policy'>('fare');
   const [currentFlight, setCurrentFlight] = useState<Flight>(flight);
+  const [currency, setCurrency] = useState<CurrencyOption>(getSavedCurrency);
+
+  useEffect(() => {
+    const handleCurrencyChange = () => setCurrency(getSavedCurrency());
+    window.addEventListener('currency_change', handleCurrencyChange);
+    return () => window.removeEventListener('currency_change', handleCurrencyChange);
+  }, []);
+
   const [isRepricing, setIsRepricing] = useState<boolean>(false);
   const [repriceNotice, setRepriceNotice] = useState<{
     type: 'success' | 'warning' | 'error';
@@ -423,23 +432,23 @@ const FlightDetails: React.FC<FlightDetailsProps> = ({ flight, onBack }) => {
                      <div className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800">
                        <div className="flex flex-col">
                          <span className="text-slate-800 dark:text-white font-bold">Base Fare</span>
-                         <span className="text-xs text-slate-400 dark:text-slate-500 font-medium italic">Adult(s) (1 X ₹{baseFare.toLocaleString()})</span>
+                         <span className="text-xs text-slate-400 dark:text-slate-500 font-medium italic">Adult(s) (1 X {currency.symbol}{convertINR(baseFare, currency.code).toLocaleString()})</span>
                        </div>
-                       <span className="font-bold text-slate-900 dark:text-white text-lg">₹{baseFare.toLocaleString()}</span>
+                       <span className="font-bold text-slate-900 dark:text-white text-lg">{currency.symbol}{convertINR(baseFare, currency.code).toLocaleString()}</span>
                      </div>
                      <div className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800">
                        <div className="flex flex-col">
                          <span className="text-slate-800 dark:text-white font-bold">Taxes & Fees</span>
                          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium italic">Fuel surcharge, Airport fees, GST</span>
                        </div>
-                       <span className="font-bold text-slate-900 dark:text-white text-lg">₹{(taxes + fees).toLocaleString()}</span>
+                       <span className="font-bold text-slate-900 dark:text-white text-lg">{currency.symbol}{convertINR(taxes + fees, currency.code).toLocaleString()}</span>
                      </div>
                      <div className="flex justify-between items-center pt-6">
                        <div className="flex flex-col">
                          <span className="text-xl font-black text-slate-900 dark:text-white">Total Fare</span>
-                         <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Inclusive of all taxes and surcharges</span>
+                         <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Inclusive of all taxes and surcharges ({currency.code})</span>
                        </div>
-                       <span className="text-3xl font-black text-blue-900 dark:text-blue-400">₹{currentFlight.price.toLocaleString()}</span>
+                       <span className="text-3xl font-black text-blue-900 dark:text-blue-400">{currency.symbol}{convertINR(currentFlight.price, currency.code).toLocaleString()}</span>
                      </div>
                      <div className="mt-8 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-100 dark:border-orange-900/30 flex gap-4">
                         <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/40 rounded-full flex items-center justify-center shrink-0">
@@ -752,39 +761,39 @@ const FlightDetails: React.FC<FlightDetailsProps> = ({ flight, onBack }) => {
                   </div>
                 )}
 
-                <div className="space-y-5 mb-10">
-                   <div className="flex justify-between text-sm">
-                     <span className="text-slate-500 dark:text-slate-400 font-bold">Adult Fare (x1)</span>
-                     <span className="text-slate-900 dark:text-white font-black">₹{baseFare.toLocaleString()}</span>
-                   </div>
-                   <div className="flex justify-between text-sm">
-                     <span className="text-slate-500 dark:text-slate-400 font-bold">Fee & Surcharges</span>
-                     <span className="text-slate-900 dark:text-white font-black">₹{(taxes + fees).toLocaleString()}</span>
-                   </div>
-                   <div className="flex justify-between text-sm">
-                     <div className="flex items-center gap-2">
-                       <span className="text-slate-500 dark:text-slate-400 font-bold">Convenience Discount</span>
-                       <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-[9px] font-black text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-100 dark:border-emerald-900/30 uppercase">Auto</span>
-                     </div>
-                     <span className="text-emerald-600 dark:text-emerald-400 font-black">-₹200</span>
-                   </div>
-                   
-                   {selectedSsrTotal > 0 && (
-                     <div className="flex justify-between text-sm pt-2 border-t border-dashed border-blue-100 dark:border-blue-900/40">
-                       <span className="text-blue-600 dark:text-blue-400 font-bold">Selected Add-ons (SSR)</span>
-                       <span className="text-blue-600 dark:text-blue-400 font-black">+₹{selectedSsrTotal.toLocaleString()}</span>
-                     </div>
-                   )}
-                   
-                   <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-end">
-                     <div>
-                       <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Total Payable</span>
-                       <span className="text-3xl font-black text-blue-900 dark:text-blue-400">₹{(Math.max(0, currentFlight.price - 200) + selectedSsrTotal).toLocaleString()}</span>
-                     </div>
-                     <span className="text-[10px] font-bold text-blue-500 dark:text-blue-400 underline decoration-dotted cursor-pointer">View Breakdown</span>
-                   </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400 font-bold">Adult Fare (x1)</span>
+                      <span className="text-slate-900 dark:text-white font-black">{currency.symbol}{convertINR(baseFare, currency.code).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400 font-bold">Fee & Surcharges</span>
+                      <span className="text-slate-900 dark:text-white font-black">{currency.symbol}{convertINR(taxes + fees, currency.code).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-500 dark:text-slate-400 font-bold">Convenience Discount</span>
+                        <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-[9px] font-black text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-100 dark:border-emerald-900/30 uppercase">Auto</span>
+                      </div>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-black">-{currency.symbol}{convertINR(200, currency.code).toLocaleString()}</span>
+                    </div>
+                    
+                    {selectedSsrTotal > 0 && (
+                      <div className="flex justify-between text-sm pt-2 border-t border-dashed border-blue-100 dark:border-blue-900/40">
+                        <span className="text-blue-600 dark:text-blue-400 font-bold">Selected Add-ons (SSR)</span>
+                        <span className="text-blue-600 dark:text-blue-400 font-black">+{currency.symbol}{convertINR(selectedSsrTotal, currency.code).toLocaleString()}</span>
+                      </div>
+                    )}
+                    
+                    <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-end">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Total Payable ({currency.code})</span>
+                        <span className="text-3xl font-black text-blue-900 dark:text-blue-400">
+                          {currency.symbol}{convertINR(Math.max(0, currentFlight.price - 200) + selectedSsrTotal, currency.code).toLocaleString()}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-500 dark:text-blue-400 underline decoration-dotted cursor-pointer">View Breakdown</span>
+                    </div>
 
-                </div>
                 
                 <button 
                   onClick={handleBookClick}

@@ -32,6 +32,9 @@ const envSchema = z.object({
   // AI Service (Optional - No Hardcoded Fallback)
   GEMINI_API_KEY: z.string().optional(),
 
+  // CurrencyFreaks Real-Time Forex API
+  CURRENCYFREAKS_API_KEY: z.string().optional(),
+
   // Flyshop External GDS Services (UAT Fallbacks for development)
   FLYSHOP_BASE_URL: z
     .string()

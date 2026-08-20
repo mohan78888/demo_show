@@ -239,7 +239,7 @@ export const TrendingHolidays: React.FC<TrendingHolidaysProps> = ({ onSelectPack
         <div className="relative group/carousel">
           <div
             ref={carouselRef}
-            className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto scrollbar-none pb-4 pt-2 snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
+            className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto scrollbar-none pb-4 pt-2 snap-x snap-mandatory scroll-smooth px-1 sm:px-0"
             style={{
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',

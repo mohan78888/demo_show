@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flight } from '../types';
 import { useRouter } from 'next/navigation';
+import { convertINR, getSavedCurrency, CurrencyOption } from '../lib/currency';
 
 interface FlightResultsProps {
   flights: Flight[];
@@ -17,17 +18,11 @@ const FlightResults: React.FC<FlightResultsProps> = ({
 }) => {
   const router = useRouter();
   const [displayCount, setDisplayCount] = useState<number>(initialLimit);
-  const [currencySymbol, setCurrencySymbol] = useState('$');
-  const [currencyCode, setCurrencyCode] = useState('USD');
+  const [currency, setCurrency] = useState<CurrencyOption>(getSavedCurrency);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateCurrency = () => {
-      if (typeof window !== 'undefined') {
-        const code = localStorage.getItem('preferred_currency') || 'USD';
-        const symbol = localStorage.getItem('preferred_currency_symbol') || '$';
-        setCurrencyCode(code);
-        setCurrencySymbol(symbol);
-      }
+      setCurrency(getSavedCurrency());
     };
     updateCurrency();
     window.addEventListener('currency_change', updateCurrency);
@@ -41,7 +36,7 @@ const FlightResults: React.FC<FlightResultsProps> = ({
   const hasMore = displayCount < flights.length;
 
   const handleViewMore = () => {
-    setDisplayCount(prev => Math.min(prev + 6, flights.length));
+    setDisplayCount((prev: number) => Math.min(prev + 6, flights.length));
   };
 
   const handleNavigateToFlightsPage = () => {
@@ -145,8 +140,10 @@ const FlightResults: React.FC<FlightResultsProps> = ({
               <div className="w-full md:w-1/4 lg:w-1/5 flex flex-row md:flex-col items-center justify-between md:justify-center border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800 pt-3 md:pt-0 md:pl-5 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl md:rounded-b-none md:rounded-r-2xl -mx-3 -mb-3 px-3 md:mx-0 md:mb-0 pb-3 md:pb-0">
                 <div className="mb-0 md:mb-3">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-[10px] md:text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{currencyCode}</span>
-                    <span className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white">{currencySymbol}{flight.price.toLocaleString()}</span>
+                    <span className="text-[10px] md:text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase">{currency.code}</span>
+                    <span className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white">
+                      {currency.symbol}{convertINR(flight.price, currency.code).toLocaleString()}
+                    </span>
                   </div>
                   <p className="text-[9px] md:text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-widest text-left md:text-center mt-0.5">Per Traveler</p>
                 </div>
