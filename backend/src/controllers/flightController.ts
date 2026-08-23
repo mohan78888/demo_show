@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import asyncHandler from '../middleware/asyncHandler.js';
 import * as flightService from '../services/flightService.js';
 
-export const preCachePopularRoutes = flightService.preCachePopularRoutes;
+// export const preCachePopularRoutes = flightService.preCachePopularRoutes;
 
+// Active Flight Search Controller
 export const searchFlights = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const result = await flightService.searchLiveFlights({
     ...req.body,
@@ -16,6 +17,7 @@ export const searchFlights = asyncHandler(async (req: Request, res: Response): P
   });
 });
 
+/*
 export const repriceFlight = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const result = await flightService.repriceLiveFlight({
     ...req.body,
@@ -58,6 +60,7 @@ export const getFlightDetails = asyncHandler(async (req: Request, res: Response)
     message: 'Flight details endpoint ready for live PNR repricing',
   });
 });
+*/
 
 
 

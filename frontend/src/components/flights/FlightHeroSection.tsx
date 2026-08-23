@@ -64,6 +64,7 @@ export const FlightHeroSection: React.FC<FlightHeroSectionProps> = ({
               fill
               priority
               sizes="100vw"
+              quality={85}
               className={`object-cover object-center ${isCheapFlights ? 'opacity-100' : 'opacity-100'}`}
             />
             {isCheapFlights ? (
@@ -120,6 +121,7 @@ export const FlightHeroSection: React.FC<FlightHeroSectionProps> = ({
             fill
             priority
             sizes="100vw"
+            quality={85}
             className={`object-cover object-center transition-all duration-300 ${
               isCheapFlights ? 'opacity-100' : 'opacity-90 md:opacity-95'
             }`}

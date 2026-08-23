@@ -13,15 +13,24 @@ export const loginSchema = z.object({
 });
 
 export const socialLoginSchema = z.object({
-  provider: z.string().optional(),
-  email: z.string().email('Please provide a valid email address'),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  profileImage: z.string().optional(),
+  idToken: z.string().min(1, 'OAuth ID token is required for social login'),
 });
 
 export const updateProfileSchema = z.object({
   firstName: z.string().min(2).max(50).optional(),
   lastName: z.string().min(2).max(50).optional(),
   profileImage: z.string().optional(),
+});
+
+export const googleAuthSchema = z.object({
+  idToken: z.string().min(1, 'Google ID token is required'),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Please provide a valid email address'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Password reset token is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
 });

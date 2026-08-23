@@ -2,20 +2,22 @@ import { z } from 'zod';
 
 export const hotelAutocompleteSchema = z.object({
   query: z.string().optional(),
-});
+}).passthrough();
 
 export const hotelSearchSchema = z.object({
   destinationName: z.string().optional(),
   cityId: z.string().optional(),
+  countryCode: z.string().optional(),
+  starRating: z.string().optional(),
   checkInDate: z.string().optional(),
   checkOutDate: z.string().optional(),
   adults: z.union([z.string(), z.number()]).optional(),
   children: z.union([z.string(), z.number()]).optional(),
   childAges: z.array(z.number()).optional(),
   rooms: z.union([z.string(), z.number()]).optional(),
-});
+}).passthrough();
 
 export const hotelDetailsSchema = z.object({
   hotelKey: z.string().min(1, 'hotelKey is required'),
   searchKey: z.string().min(1, 'searchKey is required'),
-});
+}).passthrough();

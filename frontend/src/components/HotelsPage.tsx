@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import TopHotels from './TopHotels';
 import HotelAutocomplete from './HotelAutocomplete';
-import HotelDetailsModal from './HotelDetailsModal';
-import HotelBookingModal from './HotelBookingModal';
-import Accordion from './ui/Accordion';
 import { HotelCard, RecommendedHotel } from './ui/HotelCard';
 import { hotelService, HotelSearchParams, HotelDetailInfo } from '../services/hotelService';
+
+const HotelDetailsModal = dynamic(() => import('./HotelDetailsModal'), { ssr: false });
+const HotelBookingModal = dynamic(() => import('./HotelBookingModal'), { ssr: false });
+const Accordion = dynamic(() => import('./ui/Accordion'), { ssr: true });
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2,
@@ -228,12 +230,24 @@ const HOTEL_FAQS = [
 const HotelsPage: React.FC = () => {
   const experienceScrollRef = React.useRef<HTMLDivElement>(null);
   
+  // Dynamic dates
+  const getTomorrowDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  };
+  const getFourDaysDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 4);
+    return d.toISOString().split('T')[0];
+  };
+
   // Search Form State
   const [destination, setDestination] = useState('New Delhi');
   const [selectedCityId, setSelectedCityId] = useState('227760');
   const [selectedCountryCode, setSelectedCountryCode] = useState('IN');
-  const [checkInDate, setCheckInDate] = useState('2026-08-15');
-  const [checkOutDate, setCheckOutDate] = useState('2026-08-18');
+  const [checkInDate, setCheckInDate] = useState(getTomorrowDate);
+  const [checkOutDate, setCheckOutDate] = useState(getFourDaysDate);
   const [stayType, setStayType] = useState<'all' | 'hotels' | 'resorts' | 'villas'>('all');
   const [starRating, setStarRating] = useState('any');
   
@@ -258,6 +272,9 @@ const HotelsPage: React.FC = () => {
   const [selectedHotelKeys, setSelectedHotelKeys] = useState<{ hotelKey: string; searchKey: string } | null>(null);
   const [bookingModalData, setBookingModalData] = useState<{ room: any; hotel: HotelDetailInfo } | null>(null);
 
+  // Scroll Target Ref for Search Results
+  const resultsRef = useRef<HTMLElement>(null);
+
   const scrollExperience = (direction: 'left' | 'right') => {
     if (experienceScrollRef.current) {
       const scrollAmount = direction === 'left' ? -340 : 340;
@@ -281,7 +298,7 @@ const HotelsPage: React.FC = () => {
     setChildAges(updated);
   };
 
-  const handleSearch = async (e?: React.FormEvent) => {
+  const handleSearch = async (e?: React.FormEvent, destOverride?: string) => {
     if (e) e.preventDefault();
 
     // Validation Rules
@@ -297,10 +314,12 @@ const HotelsPage: React.FC = () => {
     setIsLoading(true);
     setHasSearched(true);
 
+    const searchDest = destOverride || destination;
+
     const params: HotelSearchParams = {
-      destinationName: destination,
-      cityId: selectedCityId,
-      countryCode: selectedCountryCode,
+      destinationName: searchDest,
+      cityId: destOverride ? undefined : selectedCityId,
+      countryCode: destOverride ? undefined : selectedCountryCode,
       checkInDate,
       checkOutDate,
       adults: guests.adults,
@@ -318,11 +337,14 @@ const HotelsPage: React.FC = () => {
       setHotels([]);
     }
     setIsLoading(false);
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
   };
 
-  // Auto-scroll listener for sticky header
+  // Auto-scroll listener for sticky header (triggers cleanly after hero search box is scrolled past)
   useEffect(() => {
-    const onScroll = () => setShowStickySearch(window.scrollY > 250);
+    const onScroll = () => setShowStickySearch(window.scrollY > 420);
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
@@ -331,14 +353,15 @@ const HotelsPage: React.FC = () => {
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen text-slate-900 dark:text-white font-sans transition-colors duration-300">
 
-      {/* 1. STICKY SEARCH BAR (PINNED WHEN SCROLLED) */}
+      {/* 1. COMPACT STICKY SEARCH BAR (SLIDES DOWN AT TOP-0 WHEN SCROLLED PAST HERO) */}
       <div
-        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-all duration-300 border-b border-slate-200 dark:border-slate-800 shadow-xl ${
-          showStickySearch ? 'py-2.5 sm:py-3 opacity-100 translate-y-0 pointer-events-auto' : 'py-0 opacity-0 -translate-y-full pointer-events-none'
+        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-all duration-300 border-b border-slate-200 dark:border-slate-800 shadow-md ${
+          showStickySearch ? 'py-2 sm:py-2.5 opacity-100 translate-y-0 pointer-events-auto' : 'py-0 opacity-0 -translate-y-full pointer-events-none'
         }`}
       >
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 shadow-lg">
+          <div className="flex items-center gap-2 sm:gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-1.5 sm:p-2 shadow-sm">
+            {/* Left destination input */}
             <div className="flex-grow min-w-0">
               <HotelAutocomplete
                 value={destination}
@@ -349,25 +372,38 @@ const HotelsPage: React.FC = () => {
                 }}
               />
             </div>
-            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden lg:block shrink-0"></div>
-            <input 
-              type="date" 
-              value={checkInDate} 
-              onChange={(e) => setCheckInDate(e.target.value)} 
-              className="px-3 py-2 bg-transparent outline-none font-bold text-xs sm:text-sm text-slate-800 dark:text-white" 
-            />
-            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden lg:block shrink-0"></div>
-            <input 
-              type="date" 
-              value={checkOutDate} 
-              onChange={(e) => setCheckOutDate(e.target.value)} 
-              className="px-3 py-2 bg-transparent outline-none font-bold text-xs sm:text-sm text-slate-800 dark:text-white" 
-            />
+            
+            {/* Dates (Hidden on small mobile, visible on sm+) */}
+            <div className="hidden sm:flex items-center gap-2">
+              <div className="h-7 w-px bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+              <div className="flex items-center gap-1 px-2 py-1 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <Calendar className="w-3.5 h-3.5 text-[#E8A11A] shrink-0" />
+                <input 
+                  type="date" 
+                  value={checkInDate} 
+                  onChange={(e) => setCheckInDate(e.target.value)} 
+                  className="bg-transparent outline-none font-bold text-xs text-slate-800 dark:text-white cursor-pointer" 
+                />
+              </div>
+              <span className="text-xs text-slate-400 font-bold">→</span>
+              <div className="flex items-center gap-1 px-2 py-1 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <Calendar className="w-3.5 h-3.5 text-[#E8A11A] shrink-0" />
+                <input 
+                  type="date" 
+                  value={checkOutDate} 
+                  onChange={(e) => setCheckOutDate(e.target.value)} 
+                  className="bg-transparent outline-none font-bold text-xs text-slate-800 dark:text-white cursor-pointer" 
+                />
+              </div>
+            </div>
+
+            {/* Search Button */}
             <button
               onClick={() => handleSearch()}
-              className="px-6 py-2 bg-[#E8A11A] hover:bg-[#d69013] text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-[#E8A11A]/30 cursor-pointer"
+              className="px-4 sm:px-6 py-2 sm:py-2.5 bg-[#E8A11A] hover:bg-[#d69013] text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shrink-0 cursor-pointer flex items-center gap-1.5"
             >
-              {isLoading ? 'Searching...' : 'Search'}
+              <Search className="w-3.5 h-3.5" />
+              <span>{isLoading ? '...' : 'Search'}</span>
             </button>
           </div>
         </div>
@@ -617,171 +653,96 @@ const HotelsPage: React.FC = () => {
               )}
 
             </form>
-          </motion.div>          {/* FEATURED CAROUSEL - HIDDEN ON MOBILE, VISIBLE ON TABLET & DESKTOP */}
-          <motion.div variants={scrollRevealVariants} className="hidden sm:block mt-8 sm:mt-12 md:mt-16 relative z-20 -mb-24 sm:-mb-32 md:-mb-40 max-w-[1300px] mx-auto text-left px-2 sm:px-4">
-            {/* Floating Right Arrow Navigation Button on Peek Card */}
-            <button
-              type="button"
-              onClick={() => scrollExperience('right')}
-              className="absolute right-2 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-[#4A5D32]/85 hover:bg-[#4A5D32] text-white shadow-2xl backdrop-blur-md flex items-center justify-center transition-transform active:scale-90 cursor-pointer border border-white/30"
-              aria-label="Scroll Carousel Right"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-white stroke-[2.5]" />
-            </button>
+          </motion.div>
 
-            {/* Horizontal Carousel Track */}
-            <div
-              ref={experienceScrollRef}
-              className="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth scrollbar-hide snap-x py-2 px-1 w-full max-w-full"
-            >
-              {EXPERIENCE_CARDS.map((item) => (
-                <div
-                  key={item.id}
-                  className="sm:min-w-[580px] md:min-w-[680px] lg:min-w-[760px] shrink-0 bg-white rounded-none shadow-[0_16px_48px_rgba(0,0,0,0.5)] snap-start overflow-hidden border border-slate-200/80 flex flex-col justify-between"
-                >
-                  <div className="relative h-44 sm:h-52 md:h-56 w-full">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      priority={item.id === '1'}
-                      sizes="760px"
-                      className="object-cover object-center"
-                    />
-                  </div>
+          {/* FEATURED CAROUSEL - SHOWN HERE ONLY WHEN NOT SEARCHED */}
+          {!hasSearched && (
+            <motion.div variants={scrollRevealVariants} className="hidden sm:block mt-12 sm:mt-16 md:mt-20 relative z-20 -mb-28 sm:-mb-36 md:-mb-44 max-w-[1300px] mx-auto text-left px-2 sm:px-4">
+              {/* Floating Right Arrow Navigation Button on Peek Card */}
+              <button
+                type="button"
+                onClick={() => scrollExperience('right')}
+                className="absolute right-2 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-[#4A5D32]/85 hover:bg-[#4A5D32] text-white shadow-2xl backdrop-blur-md flex items-center justify-center transition-transform active:scale-90 cursor-pointer border border-white/30"
+                aria-label="Scroll Carousel Right"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 text-white stroke-[2.5]" />
+              </button>
 
-                  <div className="p-4 sm:p-5 bg-white flex items-end justify-between gap-5 text-slate-900">
-                    <div className="max-w-xl">
-                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 uppercase tracking-tight">
-                        {item.title}
-                      </h3>
-                      <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
-                        {item.subtitle}
-                      </p>
+              {/* Horizontal Carousel Track */}
+              <div
+                ref={experienceScrollRef}
+                className="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth scrollbar-hide snap-x py-2 px-1 w-full max-w-full"
+              >
+                {EXPERIENCE_CARDS.map((item) => (
+                  <div
+                    key={item.id}
+                    className="sm:min-w-[580px] md:min-w-[680px] lg:min-w-[760px] shrink-0 bg-white rounded-none shadow-[0_16px_48px_rgba(0,0,0,0.5)] snap-start overflow-hidden border border-slate-200/80 flex flex-col justify-between"
+                  >
+                    <div className="relative h-44 sm:h-52 md:h-56 w-full">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        priority={item.id === '1'}
+                        sizes="760px"
+                        className="object-cover object-center"
+                      />
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleSearch()}
-                      className="w-28 sm:w-32 h-9 sm:h-10 bg-[#47A2F5] hover:bg-[#3492e8] rounded-md shadow-md shrink-0 transition-all cursor-pointer active:scale-95"
-                    />
+                    <div className="p-4 sm:p-5 bg-white flex items-end justify-between gap-5 text-slate-900">
+                      <div className="max-w-xl">
+                        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 uppercase tracking-tight">
+                          {item.title}
+                        </h3>
+                        <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
+                          {item.subtitle}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSearch()}
+                        className="w-28 sm:w-32 h-9 sm:h-10 bg-[#47A2F5] hover:bg-[#3492e8] rounded-md shadow-md shrink-0 transition-all cursor-pointer active:scale-95 text-white font-extrabold text-xs uppercase"
+                      >
+                        Explore
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       </section>
 
-      {/* VALUE PROPOSITIONS BAR BELOW HERO */}
-      <section className="w-full bg-white dark:bg-slate-950 py-8 sm:pt-32 md:pt-44 sm:pb-10 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
-            
-            {/* Feature 1: Special Offers */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-200/80 dark:border-amber-800/50 shadow-sm mt-0.5">
-                <Tag className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
-                  Special Offers
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium mt-1.5">
-                  Unlock exclusive discounts and member savings when booking hotel stays with us.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 2: Flexible & Reliable Booking */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 border border-teal-200/80 dark:border-teal-800/50 shadow-sm mt-0.5">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
-                  Guaranteed Hotel Booking
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium mt-1.5">
-                  Enjoy flexible cancellation options on selected stays and 100% verified booking confirmations.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 3: Earn Rewards */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-200/80 dark:border-indigo-800/50 shadow-sm mt-0.5">
-                <Gift className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
-                  Earn Rewards On Vacation
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium mt-1.5">
-                  Get reward points on eligible bookings that can be redeemed for extra savings on future trips.
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* RECOMMENDED HOTELS FOR YOU SECTION */}
-      <section className="py-10 md:py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/60 dark:border-slate-800/60">
-        <div className="flex items-center justify-between mb-6">
-          <div className="text-left">
-            <h2 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-              Recommended Hotels for You
-            </h2>
-            <p className="mt-1 text-slate-600 dark:text-slate-400 text-xs sm:text-sm font-medium">
-              Handpicked luxury stays & boutique resorts worldwide at exclusive direct rates.
-            </p>
-          </div>
-        </div>
-
-        {/* Desktop View: Clean 4-Column Grid (4 Cards Per Row) */}
-        <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {RECOMMENDED_HOTELS.map((hotel) => (
-            <HotelCard
-              key={hotel.id}
-              hotel={hotel}
-              onBookNow={(h) => {
-                setDestination(h.location.split(',')[0]);
-                handleSearch();
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Mobile View: Horizontal Swipeable Slider Carousel */}
-        <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 pb-4 px-1 w-full max-w-full">
-          {RECOMMENDED_HOTELS.map((hotel) => (
-            <div key={hotel.id} className="w-[85vw] min-w-[280px] shrink-0 snap-start">
-              <HotelCard
-                hotel={hotel}
-                onBookNow={(h) => {
-                  setDestination(h.location.split(',')[0]);
-                  handleSearch();
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 3. DYNAMIC HOTEL SEARCH RESULTS SECTION (Shown only after search) */}
+      {/* 2. DYNAMIC HOTEL SEARCH RESULTS (Rendered directly under Hero when searched) */}
       {hasSearched && (
-        <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+        <section ref={resultsRef} id="hotel-results-section" className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200/80 dark:border-slate-800">
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Stays in {destination}
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>Stays in {destination}</span>
+                {!isLoading && hotels.length > 0 && (
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
+                    {hotels.length} Available
+                  </span>
+                )}
               </h2>
               <p className="text-xs text-slate-500 font-semibold mt-0.5">
                 Live availability from Flyshop B2B Hotel API
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setHasSearched(false);
+                setHotels([]);
+              }}
+              className="text-xs font-bold text-[#E8A11A] hover:text-[#d69013] transition-colors self-start sm:self-auto cursor-pointer"
+            >
+              ← Show Recommended Stays
+            </button>
           </div>
 
           {/* LOADING SKELETONS - SQUARE SEARCHING CARDS */}
@@ -893,6 +854,152 @@ const HotelsPage: React.FC = () => {
               <p className="text-xs text-slate-500 mt-1">Try modifying your dates, room count or search destination.</p>
             </div>
           )}
+        </section>
+      )}
+
+      {/* 3. FEATURED EXPERIENCE CAROUSEL (Shown under search results when searched) */}
+      {hasSearched && (
+        <section className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-800/80">
+          <div className="mb-4 text-left">
+            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Featured Luxury Experiences</h3>
+            <p className="text-xs text-slate-500 font-medium">Curated stay packages with premium amenities</p>
+          </div>
+          <div className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide snap-x py-2 w-full max-w-full">
+            {EXPERIENCE_CARDS.map((item) => (
+              <div
+                key={item.id}
+                className="sm:min-w-[480px] md:min-w-[560px] lg:min-w-[620px] shrink-0 bg-white dark:bg-slate-900 rounded-2xl shadow-md snap-start overflow-hidden border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between"
+              >
+                <div className="relative h-44 sm:h-48 w-full">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="620px"
+                    className="object-cover object-center"
+                  />
+                </div>
+                <div className="p-4 bg-white dark:bg-slate-900 flex items-end justify-between gap-4 text-slate-900 dark:text-white">
+                  <div className="max-w-md">
+                    <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-normal line-clamp-2 leading-relaxed">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleSearch()}
+                    className="w-24 h-9 bg-[#47A2F5] hover:bg-[#3492e8] rounded-md shadow-md shrink-0 transition-all cursor-pointer active:scale-95 text-white font-extrabold text-xs uppercase"
+                  >
+                    Explore
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 4. VALUE PROPOSITIONS BAR BELOW HERO */}
+      <section className={`w-full bg-white dark:bg-slate-950 py-8 ${!hasSearched ? 'sm:pt-36 md:pt-48' : 'sm:py-10'} sm:pb-10 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+            
+            {/* Feature 1: Special Offers */}
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-200/80 dark:border-amber-800/50 shadow-sm mt-0.5">
+                <Tag className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
+                  Special Offers
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium mt-1.5">
+                  Unlock exclusive discounts and member savings when booking hotel stays with us.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 2: Flexible & Reliable Booking */}
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 border border-teal-200/80 dark:border-teal-800/50 shadow-sm mt-0.5">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
+                  Guaranteed Hotel Booking
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium mt-1.5">
+                  Enjoy flexible cancellation options on selected stays and 100% verified booking confirmations.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 3: Earn Rewards */}
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-200/80 dark:border-indigo-800/50 shadow-sm mt-0.5">
+                <Gift className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
+                  Earn Rewards On Vacation
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium mt-1.5">
+                  Get reward points on eligible bookings that can be redeemed for extra savings on future trips.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* RECOMMENDED HOTELS SECTION - ONLY SHOWN BEFORE SEARCH TO PREVENT PROPERTY CLASHES */}
+      {!hasSearched && (
+        <section className="py-10 md:py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/60 dark:border-slate-800/60">
+          <div className="flex items-center justify-between mb-6">
+            <div className="text-left">
+              <h2 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                Recommended Hotels for You
+              </h2>
+              <p className="mt-1 text-slate-600 dark:text-slate-400 text-xs sm:text-sm font-medium">
+                Handpicked luxury stays & boutique resorts worldwide at exclusive direct rates.
+              </p>
+            </div>
+          </div>
+
+          {/* Desktop View: Clean 4-Column Grid (4 Cards Per Row) */}
+          <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {RECOMMENDED_HOTELS.map((hotel) => (
+              <HotelCard
+                key={hotel.id}
+                hotel={hotel}
+                onBookNow={(h) => {
+                  const targetCity = h.location.split(',')[0].trim();
+                  setDestination(targetCity);
+                  handleSearch(undefined, targetCity);
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Mobile View: Horizontal Swipeable Slider Carousel */}
+          <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 pb-4 px-1 w-full max-w-full">
+            {RECOMMENDED_HOTELS.map((hotel) => (
+              <div key={hotel.id} className="w-[85vw] min-w-[280px] shrink-0 snap-start">
+                <HotelCard
+                  hotel={hotel}
+                  onBookNow={(h) => {
+                    const targetCity = h.location.split(',')[0].trim();
+                    setDestination(targetCity);
+                    handleSearch(undefined, targetCity);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         </section>
       )}
 

@@ -1,4 +1,12 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+};
 
 export interface DestinationSuggestion {
   id: string;
@@ -58,7 +66,7 @@ export const hotelService = {
   // Autocomplete City / Destination
   autocompleteDestinations: async (query: string): Promise<DestinationSuggestion[]> => {
     try {
-      const res = await fetch(`${API_BASE_URL}/hotels/autocomplete`, {
+      const res = await fetch(`${getApiBase()}/hotels/autocomplete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
@@ -74,7 +82,7 @@ export const hotelService = {
   // Main Hotel Search
   searchHotels: async (params: HotelSearchParams) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/hotels/search`, {
+      const res = await fetch(`${getApiBase()}/hotels/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params)
@@ -90,7 +98,7 @@ export const hotelService = {
   // Get Hotel Details
   getHotelDetails: async (hotelKey: string, searchKey: string): Promise<HotelDetailInfo | null> => {
     try {
-      const res = await fetch(`${API_BASE_URL}/hotels/details`, {
+      const res = await fetch(`${getApiBase()}/hotels/details`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ hotelKey, searchKey })
@@ -111,7 +119,7 @@ export const hotelService = {
     recommendationId: string
   ): Promise<CancellationPolicyInfo | null> => {
     try {
-      const res = await fetch(`${API_BASE_URL}/hotels/cancellation-policy`, {
+      const res = await fetch(`${getApiBase()}/hotels/cancellation-policy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ hotelKey, searchKey, ratePlanId, recommendationId })
@@ -127,7 +135,7 @@ export const hotelService = {
   // Temp Hold Booking
   createTempBooking: async (bookingData: any) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/hotels/temp-booking`, {
+      const res = await fetch(`${getApiBase()}/hotels/temp-booking`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData)
@@ -143,7 +151,7 @@ export const hotelService = {
   // Confirm Voucher Ticketing
   issueHotelTicket: async (bookingRefNo: string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/hotels/ticket`, {
+      const res = await fetch(`${getApiBase()}/hotels/ticket`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bookingRefNo })

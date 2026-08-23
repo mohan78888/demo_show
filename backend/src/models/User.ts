@@ -6,10 +6,15 @@ export interface IUser extends Document {
   lastName: string;
   email: string;
   password?: string;
+  googleId?: string | null;
+  authProvider: 'local' | 'google';
+  avatar?: string;
   role: 'user' | 'admin';
   isEmailVerified: boolean;
   profileImage: string;
   lastLogin: Date | null;
+  resetPasswordToken?: string | null;
+  resetPasswordExpire?: Date | null;
   createdAt: Date;
   updatedAt: Date;
   matchPassword(enteredPassword: string): Promise<boolean>;
@@ -21,14 +26,13 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: [true, 'First name is required'],
       trim: true,
-      minlength: [2, 'First name must be at least 2 characters'],
+      minlength: [1, 'First name must be at least 1 character'],
       maxlength: [50, 'First name cannot exceed 50 characters'],
     },
     lastName: {
       type: String,
-      required: [true, 'Last name is required'],
+      default: '',
       trim: true,
-      minlength: [2, 'Last name must be at least 2 characters'],
       maxlength: [50, 'Last name cannot exceed 50 characters'],
     },
     email: {
@@ -42,9 +46,27 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      required: function (this: any) {
+        return this.authProvider === 'local';
+      },
       minlength: [6, 'Password must be at least 6 characters'],
       select: false,
+    },
+    googleId: {
+      type: String,
+      default: null,
+      sparse: true,
+      index: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+      index: true,
+    },
+    avatar: {
+      type: String,
+      default: '',
     },
     role: {
       type: String,
@@ -62,6 +84,16 @@ const userSchema = new mongoose.Schema<IUser>(
     lastLogin: {
       type: Date,
       default: null,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      default: null,
+      select: false,
     },
   },
   {

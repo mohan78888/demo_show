@@ -39,30 +39,13 @@
   --color-blue-800: #010a21;
   --color-blue-900: #00040f;
 
-  /* Secondary: #0F172A */
-  --color-slate-900: #0f172a;
-  --color-slate-950: #05163d; /* dark mode background overrides */
-  --color-gray-900: #0f172a;
+  /* Brand specific dark theme background */
+  --color-slate-950: #05163d;
 
-  /* Pure White Page & Section Background */
-  --color-slate-50: #ffffff;
-  --color-gray-50: #ffffff;
-
-  /* Primary Text: #0f172a */
-  --color-slate-800: #0f172a;
-  --color-gray-800: #0f172a;
-  
-  /* Secondary Text: #64748b */
-  --color-slate-500: #64748b;
-  --color-gray-500: #64748b;
-  --color-slate-400: #9ca3af;
-  --color-gray-400: #9ca3af;
-
-  /* Dividers & Borders: #F1F5F9 */
-  --color-slate-200: #f1f5f9;
-  --color-gray-200: #f1f5f9;
-  --color-slate-100: #f1f5f9;
-  --color-gray-100: #f1f5f9;
+  /* Custom Brand Tokens */
+  --color-brand-primary: #031b4e;
+  --color-brand-gold: #e8a11a;
+  --color-brand-navy: #0E255E;
 
   /* Success, Warning, Danger overrides */
   --color-green-500: #22c55e;

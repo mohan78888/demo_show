@@ -5,6 +5,7 @@ import { cacheStore } from '../utils/cache.js';
 import { extractCode, formatToMMDDYYYY, formatTimeAMPM } from '../utils/date.js';
 import { getAirlineName } from '../constants/constants.js';
 
+/*
 export const preCachePopularRoutes = async (): Promise<void> => {
   try {
     const response = await axios.post(`${env.FLYSHOP_BASE_URL}/Air_SectorAvailabilityPI`, {
@@ -24,6 +25,7 @@ export const preCachePopularRoutes = async (): Promise<void> => {
     logger.warn(`⚠️ Flyshop precache note: ${err?.message || err}`);
   }
 };
+*/
 
 export const searchLiveFlights = async (params: {
   from: string;
@@ -214,6 +216,7 @@ export const searchLiveFlights = async (params: {
   }
 };
 
+/*
 export const repriceLiveFlight = async (params: {
   fareId: string;
   flightKey: string;
@@ -278,7 +281,7 @@ export const repriceLiveFlight = async (params: {
     const repriceFareObj = repricedFlight?.Fares?.[0] || {};
     const repriceFareDetails = repriceFareObj?.FareDetails?.[0] || {};
 
-    const newPrice = repriceFareDetails?.Total_Amount || 
+    const newPrice = repriceFareDetails?.Total_Amount ||
       ((repriceFareDetails?.Basic_Amount || 0) + (repriceFareDetails?.AirportTax_Amount || 0)) || 0;
 
     const isFareChanged = repriceDetail?.IsFareChange ?? false;
@@ -535,34 +538,72 @@ export const tempBookingLiveFlight = async (params: {
     });
 
     const responseData = apiResponse.data;
+
+    // Debug: Print complete Flyshop response
+    logger.info(
+      `📦 Air_TempBooking Response:\n${JSON.stringify(responseData, null, 2)}`
+    );
+
     const header = responseData?.Response_Header;
 
-    const bookingRefNo = responseData?.Booking_RefNo || `FLYSHOP_UAT_${Date.now()}`;
+    // API returned an error
+    if (!header || header.Error_Code !== '0000') {
+      logger.warn(
+        `⚠️ Flyshop Air_TempBooking Error: ${header?.Error_Code} - ${header?.Error_Desc}`
+      );
 
-    if (header && header.Error_Code !== '0000' && header.Error_Code !== '0006') {
-      logger.warn(`⚠️ Flyshop Air_TempBooking error: Code ${header.Error_Code} - ${header.Error_Desc}`);
       return {
         success: false,
         bookingRefNo: null,
-        message: header.Error_Desc || 'Temporary hold booking failed on Flyshop GDS.',
+        status: 'FAILED',
+        message:
+          header?.Error_Desc || 'Flyshop Air_TempBooking failed.',
       };
     }
 
-    logger.info(`✅ Flyshop Air_TempBooking success! Booking_RefNo: ${bookingRefNo}`);
+    // Get Booking Ref Number
+    const bookingRefNo = responseData?.Booking_RefNo;
+
+    if (!bookingRefNo) {
+      logger.error(
+        `❌ Booking_RefNo not found in Flyshop response.`
+      );
+
+      return {
+        success: false,
+        bookingRefNo: null,
+        status: 'FAILED',
+        message:
+          'Flyshop did not return Booking_RefNo. Check complete API response.',
+      };
+    }
+
+    logger.info(
+      `✅ Booking Hold Successful. Booking Ref No: ${bookingRefNo}`
+    );
 
     return {
       success: true,
-      bookingRefNo: bookingRefNo,
+      bookingRefNo,
       status: 'HOLD',
-      message: 'Temporary booking hold confirmed with GDS.',
+      message: 'Temporary booking hold created successfully.',
     };
   } catch (err: any) {
-    logger.error(`❌ Error in Flyshop Air_TempBooking: ${err?.message || err}`);
+    logger.error(
+      `❌ Air_TempBooking Exception: ${err?.response?.data
+        ? JSON.stringify(err.response.data, null, 2)
+        : err?.message
+      }`
+    );
+
     return {
-      success: true,
-      bookingRefNo: `FLYSHOP_UAT_${Date.now()}`,
-      status: 'HOLD',
-      message: 'Temporary booking hold confirmed with GDS (UAT Mode).',
+      success: false,
+      bookingRefNo: null,
+      status: 'FAILED',
+      message:
+        err?.response?.data?.Response_Header?.Error_Desc ||
+        err?.message ||
+        'Air_TempBooking request failed.',
     };
   }
 };
@@ -640,6 +681,7 @@ export const issueTicketLiveFlight = async (params: {
     };
   }
 };
+*/
 
 
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Flight } from '../types';
 import { useRouter } from 'next/navigation';
-import { convertINR, getSavedCurrency, CurrencyOption } from '../lib/currency';
+import { convertINR, getSavedCurrency, CURRENCIES, CurrencyOption } from '../lib/currency';
 
 interface FlightResultsProps {
   flights: Flight[];
@@ -18,7 +18,7 @@ const FlightResults: React.FC<FlightResultsProps> = ({
 }) => {
   const router = useRouter();
   const [displayCount, setDisplayCount] = useState<number>(initialLimit);
-  const [currency, setCurrency] = useState<CurrencyOption>(getSavedCurrency);
+  const [currency, setCurrency] = useState<CurrencyOption>(CURRENCIES[0]);
 
   useEffect(() => {
     const updateCurrency = () => {

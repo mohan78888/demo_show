@@ -40,19 +40,26 @@ export const configureSecurityMiddleware = (app: Express): void => {
     'http://localhost:3002',
     'http://localhost:5173',
     'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+    'http://127.0.0.1:5173',
   ];
 
   if (env.FRONTEND_URL) {
     const cleanUrl = env.FRONTEND_URL.trim().replace(/\/+$/, '');
-    if (cleanUrl) allowedOrigins.push(cleanUrl);
+    if (cleanUrl && !allowedOrigins.includes(cleanUrl)) {
+      allowedOrigins.push(cleanUrl);
+    }
   }
 
   app.use(
     cors({
       origin: (origin, callback) => {
         if (!origin) return callback(null, true);
+        if (env.NODE_ENV === 'development') return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
         if (
+          origin.startsWith('http://localhost:') ||
+          origin.startsWith('http://127.0.0.1:') ||
           origin.startsWith('http://192.168.') ||
           origin.startsWith('http://10.') ||
           origin.startsWith('http://172.')
@@ -62,9 +69,11 @@ export const configureSecurityMiddleware = (app: Express): void => {
         if (origin.endsWith('.netlify.app') || origin.endsWith('.vercel.app')) {
           return callback(null, true);
         }
-        callback(new Error(`CORS blocked for origin: ${origin}`));
+        callback(null, false);
       },
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     })
   );
 

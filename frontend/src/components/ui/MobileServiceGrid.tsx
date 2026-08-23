@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from '../../lib/utils';
 
@@ -16,6 +16,17 @@ export const MobileServiceGrid: React.FC<MobileServiceGridProps> = ({
   const router = useRouter();
   const sliderRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    // Proactively prefetch common mobile navigation destinations in background
+    router.prefetch('/hotels');
+    router.prefetch('/flights');
+    router.prefetch('/bus');
+    router.prefetch('/car-rental');
+    router.prefetch('/offers');
+    router.prefetch('/customer-service');
+    router.prefetch('/special-offer');
+  }, [router]);
 
   const handleScroll = () => {
     if (sliderRef.current) {

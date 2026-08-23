@@ -11,11 +11,7 @@ interface LoginCredentials {
 }
 
 interface SocialLoginData {
-  provider: 'google' | 'apple' | 'facebook';
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  profileImage?: string;
+  idToken: string;
 }
 
 interface AuthResponse {
@@ -36,112 +32,113 @@ interface AuthResponse {
   };
 }
 
-const API_URL = '/api';
+const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:5000/api';
+    }
+  }
+  return '/api';
+};
+
+async function postAuth(endpoint: string, body: any): Promise<AuthResponse> {
+  const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const urlsToTry = isLocal
+    ? [`http://localhost:5000/api${endpoint}`, `/api${endpoint}`]
+    : [`/api${endpoint}`, `http://localhost:5000/api${endpoint}`];
+
+  let lastError: Error | null = null;
+
+  for (const url of urlsToTry) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const text = await response.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
+      if (!response.ok) {
+        const errorMsg = data.message || data.error || `Authentication failed (${response.status})`;
+        throw new Error(errorMsg);
+      }
+
+      if (data.token) {
+        authService.setToken(data.token);
+      }
+      return data;
+    } catch (err: any) {
+      lastError = err;
+      // If it was a real response from the backend (like invalid credentials or validation error), surface it immediately
+      if (err.message && !err.message.includes('fetch') && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
+        throw err;
+      }
+    }
+  }
+
+  throw new Error(lastError?.message || 'Cannot connect to authentication server. Please ensure backend is running.');
+}
 
 export const authService = {
   async signup(userData: SignupData): Promise<AuthResponse> {
-    try {
-      const response = await fetch(`${API_URL}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Backend server is not active on port 5000. Please start the backend server.');
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `Server error: ${response.status}`);
-      }
-
-      if (data.token) {
-        this.setToken(data.token);
-      }
-      return data;
-    } catch (error: any) {
-      console.error('Signup service error:', error);
-      if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-        throw new Error('Cannot connect to server. Please make sure the backend is running on port 5000.');
-      }
-      throw error;
-    }
+    return postAuth('/auth/signup', userData);
   },
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
-      });
+    return postAuth('/auth/login', credentials);
+  },
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Backend server is not active on port 5000. Please start the backend server.');
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `Server error: ${response.status}`);
-      }
-
-      if (data.token) {
-        this.setToken(data.token);
-      }
-      return data;
-    } catch (error: any) {
-      console.error('Login service error:', error);
-      if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-        throw new Error('Cannot connect to server. Please make sure the backend is running on port 5000.');
-      }
-      throw error;
-    }
+  async loginWithGoogle(idToken: string): Promise<AuthResponse> {
+    return postAuth('/auth/google', { idToken });
   },
 
   async socialLogin(socialData: SocialLoginData): Promise<AuthResponse> {
-    try {
-      const response = await fetch(`${API_URL}/auth/social`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(socialData),
-      });
+    return postAuth('/auth/social', socialData);
+  },
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Backend server is not active on port 5000. Please start the backend server.');
-      }
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const url = isLocal ? 'http://localhost:5000/api/auth/forgot-password' : '/api/auth/forgot-password';
 
-      const data = await response.json();
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
 
-      if (!response.ok) {
-        throw new Error(data.message || `Server error: ${response.status}`);
-      }
-
-      if (data.token) {
-        this.setToken(data.token);
-      }
-      return data;
-    } catch (error: any) {
-      console.error('Social login error:', error);
-      if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-        throw new Error('Cannot connect to server. Please make sure the backend is running on port 5000.');
-      }
-      throw error;
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send password reset email.');
     }
+    return data;
+  },
+
+  async resetPassword(token: string, password: string): Promise<AuthResponse> {
+    return postAuth('/auth/reset-password', { token, password });
   },
 
   async getProfile(): Promise<any | null> {
     try {
       const token = this.getToken();
-      if (!token) return null;
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const response = await fetch(`${API_URL}/auth/profile`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+      const response = await fetch(`${getApiBase()}/auth/profile`, {
+        credentials: 'include',
+        headers,
       });
 
       if (!response.ok) {
@@ -165,7 +162,15 @@ export const authService = {
     return localStorage.getItem('triphawks_token');
   },
 
-  logout(): void {
+  async logout(): Promise<void> {
     localStorage.removeItem('triphawks_token');
+    try {
+      await fetch(`${getApiBase()}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Ignore network errors during logout
+    }
   }
 };

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Flight, SSRGroup, SSRItem, PassengerInfo } from '../types';
 import { flightService } from '../services/flightService';
-import { convertINR, getSavedCurrency, CurrencyOption } from '../lib/currency';
+import { convertINR, getSavedCurrency, CURRENCIES, CurrencyOption } from '../lib/currency';
 
 interface FlightDetailsProps {
   flight: Flight;
@@ -14,9 +14,10 @@ interface FlightDetailsProps {
 const FlightDetails: React.FC<FlightDetailsProps> = ({ flight, onBack }) => {
   const [activeTab, setActiveTab] = useState<'fare' | 'baggage' | 'services' | 'policy'>('fare');
   const [currentFlight, setCurrentFlight] = useState<Flight>(flight);
-  const [currency, setCurrency] = useState<CurrencyOption>(getSavedCurrency);
+  const [currency, setCurrency] = useState<CurrencyOption>(CURRENCIES[0]);
 
   useEffect(() => {
+    setCurrency(getSavedCurrency());
     const handleCurrencyChange = () => setCurrency(getSavedCurrency());
     window.addEventListener('currency_change', handleCurrencyChange);
     return () => window.removeEventListener('currency_change', handleCurrencyChange);

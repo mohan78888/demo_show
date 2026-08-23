@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Carousel from './ui/Carousel';
-import { convertINR, getSavedCurrency, CurrencyOption } from '../lib/currency';
+import { convertINR, getSavedCurrency, CURRENCIES, CurrencyOption } from '../lib/currency';
 
 export interface CheapestFlightCard {
   id: string;
@@ -214,9 +214,10 @@ interface CheapestFlightsProps {
 }
 
 const CheapestFlights: React.FC<CheapestFlightsProps> = ({ onSelectFlight }) => {
-  const [currency, setCurrency] = useState<CurrencyOption>(getSavedCurrency);
+  const [currency, setCurrency] = useState<CurrencyOption>(CURRENCIES[0]);
 
   useEffect(() => {
+    setCurrency(getSavedCurrency());
     const handleCurrencyChange = () => setCurrency(getSavedCurrency());
     window.addEventListener('currency_change', handleCurrencyChange);
     return () => window.removeEventListener('currency_change', handleCurrencyChange);

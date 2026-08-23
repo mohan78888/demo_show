@@ -39,7 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({
   const [user, setUser] = useState<any>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyOption>(getSavedCurrency);
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyOption>(CURRENCIES[0]);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hideMobileCategoryStrip, setHideMobileCategoryStrip] = useState(false);
@@ -47,8 +47,28 @@ const Navbar: React.FC<NavbarProps> = ({
   const currencyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Sync saved currency after mount to prevent SSR hydration mismatch
+    setSelectedCurrency(getSavedCurrency());
+
+    const handleCurrencyEvent = (e: Event) => {
+      const customEvt = e as CustomEvent<CurrencyOption>;
+      if (customEvt.detail) {
+        setSelectedCurrency(customEvt.detail);
+      } else {
+        setSelectedCurrency(getSavedCurrency());
+      }
+    };
+    window.addEventListener('currency_change', handleCurrencyEvent);
+
     // Fetch live rates from CurrencyFreaks via backend on load
     getExchangeRates();
+
+    // Prefetch main destination routes for zero-lag instant navigation
+    router.prefetch('/hotels');
+    router.prefetch('/flights');
+    router.prefetch('/bus');
+    router.prefetch('/offers');
+    router.prefetch('/customer-service');
 
     const handleOutsideClick = (e: MouseEvent) => {
       if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
@@ -56,8 +76,11 @@ const Navbar: React.FC<NavbarProps> = ({
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, []);
+    return () => {
+      window.removeEventListener('currency_change', handleCurrencyEvent);
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [router]);
 
   const handleSelectCurrency = (curr: CurrencyOption) => {
     setSelectedCurrency(curr);

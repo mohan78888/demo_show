@@ -15,12 +15,24 @@ export const apiLimiter = rateLimit({
 // Strict Auth Limiter (Only penalizes failed attempts)
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 15,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
   message: {
     success: false,
-    message: 'Too many failed authentication attempts. Blocked for 15 minutes.',
+    message: 'Too many failed authentication attempts. Please try again in a few minutes.',
+  },
+});
+
+// Dedicated Strict Password Reset Limiter (Prevents Email Abuse / Spamming)
+export const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Max 5 requests per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many password reset requests. Please try again after 15 minutes.',
   },
 });

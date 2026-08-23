@@ -51,6 +51,10 @@ const envSchema = z.object({
 
   // Frontend & Security
   FRONTEND_URL: z.string().optional(),
+
+  // Google OAuth
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
 
 /**

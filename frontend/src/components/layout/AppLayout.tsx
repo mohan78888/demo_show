@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
@@ -23,6 +23,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const router = useRouter();
   const { darkMode, toggleDarkMode } = useTheme();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Prefetch main destinations
+    router.prefetch('/');
+    router.prefetch('/hotels');
+    router.prefetch('/flights');
+    router.prefetch('/bus');
+    router.prefetch('/offers');
+    router.prefetch('/customer-service');
+  }, [router]);
 
   const handleAuthSuccess = (_user: any) => {
     // Refresh current page or state when user logs in/registers

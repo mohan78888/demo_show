@@ -386,6 +386,7 @@ export default function BusPage() {
             fill
             priority
             sizes="100vw"
+            quality={85}
             className="object-cover opacity-75 sm:opacity-70 object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-900/50 to-slate-950/90"></div>

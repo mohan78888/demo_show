@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import CheapestFlights from './CheapestFlights';
 import { resolveIataCode } from './AirportAutocomplete';
 import { FlightSearchFormState } from './forms/FlightSearchForm';
 import FlightHeroSection from './flights/FlightHeroSection';
@@ -71,13 +70,10 @@ export default function FlightsPage({ isCheapFlights = false }: FlightsPageProps
       {/* 2. Exclusive Flight Offers & Coupon Codes Slider */}
       <ExclusiveFlightOffers />
 
-      {/* 3. Cheapest Flights Carousel */}
-      <CheapestFlights />
-
-      {/* 4. Top Destinations Grid */}
+      {/* 3. Top Destinations Grid */}
       <FlightTopDestinations onSelectDestination={handleSelectDestination} />
 
-      {/* 5. SEO Content & FAQ Section */}
+      {/* 4. SEO Content & FAQ Section */}
       <FlightSeoFaq isCheapFlights={isCheapFlights} />
     </div>
   );

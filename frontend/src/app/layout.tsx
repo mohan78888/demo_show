@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "../context/ThemeContext";
+import GoogleAuthProvider from "./providers/GoogleAuthProvider";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -39,9 +40,11 @@ export default function RootLayout({
         />
       </head>
       <body className={`${plusJakartaSans.className} min-h-full flex flex-col`}>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <GoogleAuthProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </GoogleAuthProvider>
       </body>
     </html>
   );

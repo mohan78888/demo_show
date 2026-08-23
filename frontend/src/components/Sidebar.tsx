@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CONTACT_INFO } from '../constants/config';
 
@@ -14,6 +15,15 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    // Proactively prefetch common routes in background on mount
+    router.prefetch('/hotels');
+    router.prefetch('/flights');
+    router.prefetch('/bus');
+    router.prefetch('/car-rental');
+    router.prefetch('/offers');
+  }, [router]);
+
+  useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => {
         setToastMessage(null);
@@ -22,14 +32,10 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
     }
   }, [toastMessage]);
 
-  const handleItemClick = (item: string, route?: string) => {
-    if (route) {
-      router.push(route);
-    } else {
-      setToastMessage(
-        `${item} booking is available exclusively through our 24/7 Phone Help Desk. Call now for unpublished deals!`
-      );
-    }
+  const handleToastClick = (item: string) => {
+    setToastMessage(
+      `${item} booking is available exclusively through our 24/7 Phone Help Desk. Call now for unpublished deals!`
+    );
   };
 
   const getItemClass = (itemKey: typeof activeItem) => {
@@ -57,7 +63,7 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
         {/* GROUP 1 */}
         <div>
           <button 
-            onClick={() => handleItemClick('Cruises')}
+            onClick={() => handleToastClick('Cruises')}
             className={getItemClass('cruises')}
             title={isCollapsed ? "Cruises" : undefined}
           >
@@ -66,38 +72,41 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
             {!isCollapsed && <span className="text-[15px] truncate">Cruises</span>}
           </button>
 
-          <button 
-            onClick={() => handleItemClick('Flights', '/flights')}
+          <Link 
+            href="/flights"
+            prefetch={true}
             className={getItemClass('flights')}
             title={isCollapsed ? "Flights" : undefined}
           >
             {activeItem === 'flights' && <div className="absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-[#E8A11A] rounded-r shadow-sm shadow-[#E8A11A]/40" />}
             <span className={getIconClass('flights')}>flight</span>
             {!isCollapsed && <span className="text-[15px] truncate">Flights</span>}
-          </button>
+          </Link>
 
-          <button 
-            onClick={() => handleItemClick('Hotels', '/hotels')}
+          <Link 
+            href="/hotels"
+            prefetch={true}
             className={getItemClass('hotels')}
             title={isCollapsed ? "Hotels" : undefined}
           >
             {activeItem === 'hotels' && <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#E8A11A] rounded-r" />}
             <span className={getIconClass('hotels')}>hotel</span>
             {!isCollapsed && <span className="text-[15px] truncate">Hotels</span>}
-          </button>
+          </Link>
 
-          <button 
-            onClick={() => handleItemClick('Car Rental', '/car-rental')}
+          <Link 
+            href="/car-rental"
+            prefetch={true}
             className={getItemClass('car-rental')}
             title={isCollapsed ? "Car Rental" : undefined}
           >
             {activeItem === 'car-rental' && <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#E8A11A] rounded-r" />}
             <span className={getIconClass('car-rental')}>directions_car</span>
             {!isCollapsed && <span className="text-[15px] truncate">Car Rental</span>}
-          </button>
+          </Link>
 
           <button 
-            onClick={() => handleItemClick('Trains')}
+            onClick={() => handleToastClick('Trains')}
             className={getItemClass('trains')}
             title={isCollapsed ? "Trains" : undefined}
           >
@@ -111,18 +120,19 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
 
         {/* GROUP 2 */}
         <div>
-          <button 
-            onClick={() => handleItemClick('Holidays', '/offers')}
+          <Link 
+            href="/offers"
+            prefetch={true}
             className={getItemClass('holidays')}
             title={isCollapsed ? "Holidays" : undefined}
           >
             {activeItem === 'holidays' && <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#E8A11A] rounded-r" />}
             <span className={getIconClass('holidays')}>luggage</span>
             {!isCollapsed && <span className="text-[15px] truncate">Holidays</span>}
-          </button>
+          </Link>
 
           <button 
-            onClick={() => handleItemClick('Activities')}
+            onClick={() => handleToastClick('Activities')}
             className={getItemClass('activities')}
             title={isCollapsed ? "Activities" : undefined}
           >
@@ -137,7 +147,7 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
         {/* GROUP 3 */}
         <div>
           <button 
-            onClick={() => handleItemClick('Insurance')}
+            onClick={() => handleToastClick('Insurance')}
             className={getItemClass('insurance')}
             title={isCollapsed ? "Insurance" : undefined}
           >
@@ -147,7 +157,7 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
           </button>
 
           <button 
-            onClick={() => handleItemClick('Visa')}
+            onClick={() => handleToastClick('Visa')}
             className={getItemClass('visa')}
             title={isCollapsed ? "Visa" : undefined}
           >
@@ -156,15 +166,16 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
             {!isCollapsed && <span className="text-[15px] truncate">Visa</span>}
           </button>
 
-          <button 
-            onClick={() => handleItemClick('Bus', '/bus')}
+          <Link 
+            href="/bus"
+            prefetch={true}
             className={getItemClass('bus')}
             title={isCollapsed ? "Bus" : undefined}
           >
             {activeItem === 'bus' && <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#E8A11A] rounded-r" />}
             <span className={getIconClass('bus')}>directions_bus</span>
             {!isCollapsed && <span className="text-[15px] truncate">Bus</span>}
-          </button>
+          </Link>
         </div>
 
         <div className={`h-px bg-slate-100 dark:bg-slate-800/80 my-2.5 ${isCollapsed ? 'mx-2' : 'mx-5'}`} />
@@ -172,7 +183,7 @@ export default function Sidebar({ activeItem, isCollapsed = false }: SidebarProp
         {/* GROUP 4 */}
         <div>
           <button 
-            onClick={() => handleItemClick('App')}
+            onClick={() => handleToastClick('App')}
             className={getItemClass('app')}
             title={isCollapsed ? "App" : undefined}
           >

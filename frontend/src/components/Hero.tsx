@@ -201,8 +201,8 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
   return (
     <div className="w-full px-2 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-6 md:pt-3 md:pb-10 flex flex-col">
       
-      {/* 1. Blue Hero Banner Background (Sleek Compact Height: Mobile 155px / Tablet 200px / Desktop 260px) */}
-      <div className="relative rounded-2xl sm:rounded-[32px] overflow-hidden bg-gradient-to-r from-[#0b3372] via-[#0d459c] to-[#041a42] h-[155px] sm:h-[200px] md:h-[260px] flex flex-col justify-start pt-4 sm:pt-6 md:pt-8 items-center text-center px-4 sm:px-8 select-none shadow-[0_8px_24px_rgba(15,23,42,0.08)] border border-[#F8FAFC] dark:border-slate-800/20">
+      {/* 1. Blue Hero Banner Background (Sleek Compact Height: Mobile 175px / Tablet 220px / Desktop 270px) */}
+      <div className="relative rounded-2xl sm:rounded-[32px] overflow-hidden bg-gradient-to-r from-[#0b3372] via-[#0d459c] to-[#041a42] h-[175px] sm:h-[220px] md:h-[270px] flex flex-col justify-start pt-4 sm:pt-6 md:pt-8 items-center text-center px-4 sm:px-8 select-none shadow-[0_8px_24px_rgba(15,23,42,0.08)] border border-[#F8FAFC] dark:border-slate-800/20">
         
         {/* Auto-playing background image slider layer */}
         <div className="absolute inset-0 z-0 select-none overflow-hidden">
@@ -260,8 +260,8 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
 
       </div>
 
-      {/* 2. Floating Navigation & Overlapping Search Card (Positioned higher, reduced gap) */}
-      <div className="relative z-20 w-[98%] sm:w-[92%] lg:w-[94%] max-w-5xl mx-auto flex flex-col items-center gap-1.5 sm:gap-2 -mt-16 sm:-mt-22 md:-mt-28">
+      {/* 2. Floating Navigation & Overlapping Search Card (Balanced offset without clipping badges) */}
+      <div className="relative z-20 w-[98%] sm:w-[92%] lg:w-[94%] max-w-5xl mx-auto flex flex-col items-center gap-1.5 sm:gap-2 -mt-10 sm:-mt-14 md:-mt-20">
         
         {/* Floating Dark Navy Navigation Bar */}
         <div className="bg-[#0b3372]/90 backdrop-blur-md border border-white/15 p-1 rounded-full flex gap-1 items-center max-w-full overflow-x-auto select-none scrollbar-hide shadow-[0_8px_24px_rgba(15,23,42,0.08)]">

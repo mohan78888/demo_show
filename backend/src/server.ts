@@ -11,7 +11,7 @@ import env from './config/env.js';
 import logger from './config/logger.js';
 import app from './app.js';
 import { connectDB, disconnectDB } from './config/database.js';
-import { preCachePopularRoutes } from './controllers/flightController.js';
+// import { preCachePopularRoutes } from './controllers/flightController.js';
 
 // Server Initialization & Graceful Shutdown
 const startServer = async () => {
@@ -22,9 +22,10 @@ const startServer = async () => {
     logger.info(`📡 API available at http://localhost:${env.PORT}/api`);
     logger.info(`🏥 Health check at http://localhost:${env.PORT}/health`);
 
-    preCachePopularRoutes().catch((err) =>
-      logger.warn(`Pre-caching skipped: ${err?.message || err}`)
-    );
+    // Sector availability pre-caching disabled
+    // preCachePopularRoutes().catch((err) =>
+    //   logger.warn(`Pre-caching skipped: ${err?.message || err}`)
+    // );
   });
 
   const gracefulShutdown = async (signal: string) => {

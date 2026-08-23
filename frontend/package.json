@@ -6,11 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-
     "lint": "eslint"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.10",
+    "@react-oauth/google": "^0.13.5",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.25.0",
     "next": "16.2.9",
