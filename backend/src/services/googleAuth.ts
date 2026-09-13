@@ -3,8 +3,13 @@ import env from '../config/env.js';
 import AppError from '../utils/AppError.js';
 import logger from '../config/logger.js';
 
-const DEFAULT_GOOGLE_CLIENT_ID = '462687260418-kjgforlni58se9juv1fpt9dno8lk6313.apps.googleusercontent.com';
-const getGoogleClientId = () => env.GOOGLE_CLIENT_ID || DEFAULT_GOOGLE_CLIENT_ID;
+const getGoogleClientId = (): string => {
+  const clientId = env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    throw new AppError('GOOGLE_CLIENT_ID is not configured on the server.', 500);
+  }
+  return clientId;
+};
 
 export interface GoogleUserData {
   googleId: string;

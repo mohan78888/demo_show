@@ -11,6 +11,7 @@ import Footer from '../../../components/Footer';
 import InternationalRoutes from '../../../components/InternationalRoutes';
 import AIAssistant from '../../../components/AIAssistant';
 import SkeletonLoader from '../../../components/SkeletonLoader';
+import FlightBookingModal from '../../../components/FlightBookingModal';
 import { Flight, SearchParams } from '../../../types';
 import { flightService } from '../../../services/flightService';
 
@@ -22,8 +23,11 @@ export default function FlightRoutePage() {
   const [isSearching, setIsSearching] = useState(true);
   const [searchResults, setSearchResults] = useState<Flight[]>([]);
   const [searchParams, setSearchParams] = useState<SearchParams | null>(null);
+  const [selectedBookingFlight, setSelectedBookingFlight] = useState<Flight | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'price' | 'fastest' | 'nonstop'>('price');
   const [darkMode, setDarkMode] = useState(false);
+
 
   // Parse path jfk-to-lax
   const [origin, destination] = useMemo(() => {
@@ -100,12 +104,13 @@ export default function FlightRoutePage() {
   };
 
   const handleBookClick = (flight: Flight) => {
-    // Dynamic query redirect or local state
-    // We can redirect to /?book=flightId or similar, or just render checkout here
-    // Redirect to main home to complete booking with details view
-    localStorage.setItem('triphawks_selected_flight', JSON.stringify(flight));
-    router.push(`/?view=details`);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tourhelpdesk_selected_flight', JSON.stringify(flight));
+    }
+    router.push('/?view=details');
   };
+
+
 
   const sortedFlights = useMemo(() => {
     const flights = [...searchResults];
@@ -210,6 +215,12 @@ export default function FlightRoutePage() {
         onTermsClick={() => router.push('/terms-of-use')}
         onCreditCardVerificationClick={() => router.push('/credit-card-verification')}
         onContactClick={() => router.push('/contact')}
+      />
+      <FlightBookingModal
+        isOpen={isBookingModalOpen}
+        flight={selectedBookingFlight}
+        searchParams={searchParams}
+        onClose={() => setIsBookingModalOpen(false)}
       />
     </div>
   );

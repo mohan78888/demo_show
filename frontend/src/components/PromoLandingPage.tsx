@@ -54,15 +54,16 @@ const PromoLandingPage: React.FC<PromoLandingPageProps> = ({
           <button onClick={onLogoClick} className="flex items-center gap-2 group outline-none">
             <div className="transition-all duration-500 flex items-center justify-center group-hover:scale-110">
               <Image 
-                src="/tourhelpdesk.png" 
+                src="/tourhelpdesk-ts.png" 
                 alt="Tour Help Desk logo" 
-                width={160}
-                height={48}
+                width={130}
+                height={35}
                 priority
-                className={`object-contain transition-all duration-500 h-10 w-auto md:h-12 ${darkMode ? 'brightness-110' : ''}`}
+                style={{ width: 'auto', height: 'auto' }}
+                className={`object-contain transition-all duration-500 h-8 w-auto md:h-9 ${darkMode ? 'brightness-110' : ''}`}
               />
             </div>
-            <span className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white truncate">
+            <span className="text-lg md:text-xl font-black tracking-tight text-slate-900 dark:text-white truncate">
               Tour Help Desk
             </span>
           </button>

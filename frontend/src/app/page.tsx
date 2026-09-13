@@ -21,11 +21,13 @@ import { resolveIataCode } from '../components/AirportAutocomplete';
 
 import AuthModal from '../components/AuthModal';
 import OfflineHotlineBanner from '../components/common/OfflineHotlineBanner';
+import FlightBookingModal from '../components/FlightBookingModal';
+import ExploreFlightsByAirline from '../components/ExploreFlightsByAirline';
+import FlightFilterSidebar, { parseTimeToHour, getTimeSlot } from '../components/flights/FlightFilterSidebar';
 
-const PromotionalPopup = React.lazy(() => import('../components/PromotionalPopup'));
 const FlightDetails = React.lazy(() => import('../components/FlightDetails'));
 
-import { SearchParams, Flight } from '../types';
+import { SearchParams, Flight, FlightFilterState, SSRGroup } from '../types';
 import { flightService } from '../services/flightService';
 
 function HomeContent() {
@@ -37,11 +39,30 @@ function HomeContent() {
   const [searchParams, setSearchParams] = useState<SearchParams | null>(null);
   const [view, setView] = useState<'home' | 'details'>('home');
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+  const [selectedBookingFlight, setSelectedBookingFlight] = useState<Flight | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'price' | 'fastest' | 'nonstop'>('price');
-  const [showPromo, setShowPromo] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // Dynamic Filter State
+  const [filters, setFilters] = useState<FlightFilterState>({
+    selectedAirlines: [],
+    selectedStops: [],
+    departureTimeSlots: [],
+    arrivalTimeSlots: [],
+    maxPrice: Infinity,
+    maxDurationMinutes: Infinity,
+    selectedLayovers: [],
+  });
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // On-Select Reprice & SSR State
+  const [verifyingFlightId, setVerifyingFlightId] = useState<string | null>(null);
+  const [ssrData, setSsrData] = useState<SSRGroup | null>(null);
+  const [isFareChanged, setIsFareChanged] = useState<boolean>(false);
+  const [originalFarePrice, setOriginalFarePrice] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -63,19 +84,50 @@ function HomeContent() {
 
   const handleSearch = async (params: SearchParams) => {
     setIsSearching(true);
+    setIsSidebarCollapsed(true);
     setSearchResults([]);
     setSearchParams(params);
-    setShowPromo(false);
     setView('home');
 
     try {
       const flights = await flightService.searchFlights(params);
       setSearchResults(flights);
+
+      // Initialize dynamic filter boundaries from the Air_Search response
+      if (flights.length > 0) {
+        const prices = flights.map((f) => f.price);
+        const durations = flights.map((f) => f.durationMinutes || 120);
+        setFilters({
+          selectedAirlines: [],
+          selectedStops: [],
+          departureTimeSlots: [],
+          arrivalTimeSlots: [],
+          maxPrice: Math.max(...prices),
+          maxDurationMinutes: Math.max(...durations),
+          selectedLayovers: [],
+        });
+      }
     } catch (error) {
       console.error('Search error:', error);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleResetFilters = () => {
+    if (searchResults.length > 0) {
+      const prices = searchResults.map((f) => f.price);
+      const durations = searchResults.map((f) => f.durationMinutes || 120);
+      setFilters({
+        selectedAirlines: [],
+        selectedStops: [],
+        departureTimeSlots: [],
+        arrivalTimeSlots: [],
+        maxPrice: Math.max(...prices),
+        maxDurationMinutes: Math.max(...durations),
+        selectedLayovers: [],
+      });
     }
   };
 
@@ -88,7 +140,7 @@ function HomeContent() {
 
   useEffect(() => {
     if (viewParam === 'details') {
-      const saved = localStorage.getItem('triphawks_selected_flight');
+      const saved = localStorage.getItem('tourhelpdesk_selected_flight');
       if (saved) {
         try {
           setSelectedFlight(JSON.parse(saved));
@@ -107,16 +159,6 @@ function HomeContent() {
       });
     }
   }, [fromParam, toParam, dateParam, classParam, viewParam]);
-
-  useEffect(() => {
-    let timer: number;
-    if (searchResults.length > 0 && !isSearching && view === 'home') {
-      timer = window.setTimeout(() => {
-        setShowPromo(true);
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [searchResults, isSearching, view]);
 
   useEffect(() => {
     if (isSearching) {
@@ -157,28 +199,122 @@ function HomeContent() {
     setView('home');
     setSearchParams(null);
     setSearchResults([]);
-    setShowPromo(false);
     setSelectedFlight(null);
+    setSsrData(null);
+    setIsFareChanged(false);
+    setIsSidebarCollapsed(false);
     router.push('/');
   };
 
-  const handleBookClick = (flight: Flight) => {
-    setSelectedFlight(flight);
-    setView('details');
-    setShowPromo(false);
+  // ON-SELECT: Air_Reprice -> Air_GetSSR -> Open Flight Details
+  const handleBookClick = async (flight: Flight) => {
+    setVerifyingFlightId(flight.id);
+    const originalPrice = flight.price;
+    let currentFlight = { ...flight };
+
+    try {
+      // 1. Trigger Air_Reprice to verify real-time fare & seat availability
+      const repriceResult = await flightService.repriceFlight({
+        fareId: flight.fareId,
+        flightKey: flight.flightKey,
+        searchKey: flight.searchKey,
+        flightId: flight.id,
+      });
+
+      if (repriceResult.isFareChanged && repriceResult.newPrice) {
+        setIsFareChanged(true);
+        setOriginalFarePrice(originalPrice);
+        currentFlight = {
+          ...currentFlight,
+          price: repriceResult.newPrice,
+          fareId: repriceResult.updatedFareId || currentFlight.fareId,
+          flightKey: repriceResult.updatedFlightKey || currentFlight.flightKey,
+          seatsAvailable: repriceResult.seatsAvailable || currentFlight.seatsAvailable,
+          repriced: true,
+        };
+      } else {
+        setIsFareChanged(false);
+        setOriginalFarePrice(undefined);
+      }
+
+      // 2. Trigger Air_GetSSR for Baggage, Meals, Seats, and other SSR
+      const ssrResult = await flightService.getSSR({
+        fareId: currentFlight.fareId,
+        flightKey: currentFlight.flightKey,
+        searchKey: currentFlight.searchKey,
+      });
+
+      if (ssrResult.success && ssrResult.ssr) {
+        setSsrData(ssrResult.ssr);
+      } else {
+        setSsrData(null);
+      }
+    } catch (e) {
+      console.warn('Reprice/SSR warning:', e);
+      setIsFareChanged(false);
+      setSsrData(null);
+    } finally {
+      setVerifyingFlightId(null);
+      setSelectedFlight(currentFlight);
+      setView('details');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
+  // DYNAMIC FILTERING
+  const filteredFlights = useMemo(() => {
+    return searchResults.filter((f) => {
+      // 1. Airlines
+      if (filters.selectedAirlines.length > 0 && !filters.selectedAirlines.includes(f.airline)) {
+        return false;
+      }
+      // 2. Stops
+      if (filters.selectedStops.length > 0) {
+        const normalizedStop = (f.stops ?? 0) >= 2 ? 2 : (f.stops ?? 0);
+        if (!filters.selectedStops.includes(normalizedStop)) return false;
+      }
+      // 3. Departure Time
+      if (filters.departureTimeSlots.length > 0) {
+        const hour = parseTimeToHour(f.departureTime);
+        const slot = getTimeSlot(hour);
+        if (!filters.departureTimeSlots.includes(slot)) return false;
+      }
+      // 4. Arrival Time
+      if (filters.arrivalTimeSlots.length > 0) {
+        const hour = parseTimeToHour(f.arrivalTime);
+        const slot = getTimeSlot(hour);
+        if (!filters.arrivalTimeSlots.includes(slot)) return false;
+      }
+      // 5. Max Price
+      if (f.price > filters.maxPrice) {
+        return false;
+      }
+      // 6. Max Duration
+      if ((f.durationMinutes || 120) > filters.maxDurationMinutes) {
+        return false;
+      }
+      // 7. Layovers
+      if (filters.selectedLayovers.length > 0) {
+        const flightLayovers = f.layovers || [];
+        const hasMatchingLayover = filters.selectedLayovers.some((layover) => flightLayovers.includes(layover));
+        if (!hasMatchingLayover) return false;
+      }
+      return true;
+    });
+  }, [searchResults, filters]);
+
+  // SORTING
   const sortedFlights = useMemo(() => {
-    const flights = [...searchResults];
+    const flights = [...filteredFlights];
     if (sortBy === 'price') {
       return flights.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'fastest') {
-      return flights.sort((a, b) => a.durationMinutes - b.durationMinutes);
+      return flights.sort((a, b) => (a.durationMinutes || 120) - (b.durationMinutes || 120));
     } else if (sortBy === 'nonstop') {
       return flights.sort((a, b) => a.stops - b.stops);
     }
     return flights;
-  }, [searchResults, sortBy]);
+  }, [filteredFlights, sortBy]);
 
   const minPrice = useMemo(() => {
     if (searchResults.length === 0) return 0;
@@ -202,7 +338,7 @@ function HomeContent() {
       />
 
       <div className="flex flex-1 w-full items-stretch relative">
-        {/* Left Sidebar - visible on desktop */}
+        {/* Left Navigation Sidebar - Collapsed to 72px icon mode during search results */}
         <aside className={`hidden lg:block shrink-0 border-r border-[#F1F5F9] dark:border-slate-800 bg-white dark:bg-slate-950 sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'w-[72px]' : 'w-[240px]'}`}>
           <Sidebar activeItem="flights" isCollapsed={isSidebarCollapsed} />
         </aside>
@@ -212,8 +348,15 @@ function HomeContent() {
           {view === 'details' && selectedFlight ? (
             <FlightDetails
               flight={selectedFlight}
+              searchParams={searchParams}
+              ssrData={ssrData}
+              isFareChanged={isFareChanged}
+              originalPrice={originalFarePrice}
               onBack={() => {
                 setView('home');
+                setSelectedFlight(null);
+                setSsrData(null);
+                setIsFareChanged(false);
                 router.push('/');
               }}
             />
@@ -221,6 +364,8 @@ function HomeContent() {
             <>
               <MobileServiceGrid />
               <Hero onSearch={handleSearch} isLoading={isSearching} />
+
+
 
               {isSearching && (
                 <div id="search-loading-indicator" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-16 md:py-20 text-center">
@@ -230,46 +375,113 @@ function HomeContent() {
               )}
 
               {searchParams && searchResults.length > 0 && !isSearching && (
-                <div id="flight-results-container" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div id="flight-results-container" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+                  {/* Route & Summary Header */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div className="max-w-full md:max-w-2xl">
-                      <h2 className="text-lg md:text-xl font-black text-slate-800 leading-snug mb-1">
-                        <span className="text-slate-400 font-bold mr-2 uppercase text-[10px] md:text-xs tracking-widest hidden md:inline">Route</span>
-                        <span className="text-blue-600">{searchParams?.from}</span>
-                        <span className="text-slate-300 mx-2">→</span>
-                        <span className="text-blue-600">{searchParams?.to}</span>
+                      <h2 className="text-lg md:text-2xl font-black text-slate-900 dark:text-white leading-snug mb-1">
+                        <span className="text-blue-600 dark:text-blue-400">{searchParams?.from}</span>
+                        <span className="text-slate-300 dark:text-slate-600 mx-2">→</span>
+                        <span className="text-blue-600 dark:text-blue-400">{searchParams?.to}</span>
                       </h2>
-                      <p className="text-slate-500 text-xs md:text-sm font-semibold">{searchResults.length} premium flights found • <span className="text-slate-700">{searchParams?.date}</span></p>
+                      <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-semibold">
+                        {filteredFlights.length} of {searchResults.length} flights available • <span className="text-slate-700 dark:text-slate-300 font-bold">{searchParams?.date}</span>
+                      </p>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+                    {/* Sort Controls */}
+                    <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start md:self-auto">
                       <button
                         onClick={() => setSortBy('price')}
-                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${sortBy === 'price' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                          sortBy === 'price'
+                            ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                        }`}
                       >
                         Cheapest
                       </button>
                       <button
                         onClick={() => setSortBy('fastest')}
-                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${sortBy === 'fastest' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                          sortBy === 'fastest'
+                            ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                        }`}
                       >
                         Fastest
                       </button>
                       <button
                         onClick={() => setSortBy('nonstop')}
-                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${sortBy === 'nonstop' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                          sortBy === 'nonstop'
+                            ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                        }`}
                       >
                         Non-stop
                       </button>
                     </div>
                   </div>
 
-                  <FlightResults 
-                    flights={sortedFlights} 
-                    onBook={handleBookClick} 
-                    initialLimit={6}
-                    searchParams={searchParams}
-                  />
+                  {/* Mobile Filter Toggle Button */}
+                  <div className="lg:hidden mb-4">
+                    <button
+                      onClick={() => setIsMobileFilterOpen(true)}
+                      className="w-full py-2.5 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between font-bold text-xs text-slate-700 dark:text-slate-200 shadow-xs cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span>⚙️</span> Filter Flights
+                      </span>
+                      <span className="text-[11px] text-blue-600 dark:text-blue-400 font-bold">
+                        Tap to adjust filters →
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* 2-Column Layout: Left Filter Sidebar + Right Flight Results */}
+                  <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
+                    {/* Left Filter Sidebar */}
+                    <FlightFilterSidebar
+                      flights={searchResults}
+                      filters={filters}
+                      onFilterChange={setFilters}
+                      onReset={handleResetFilters}
+                      isOpenMobile={isMobileFilterOpen}
+                      onCloseMobile={() => setIsMobileFilterOpen(false)}
+                    />
+
+                    {/* Right Content Area: Results List */}
+                    <div className="flex-1 min-w-0 w-full">
+                      {sortedFlights.length > 0 ? (
+                        <FlightResults 
+                          flights={sortedFlights} 
+                          onBook={handleBookClick} 
+                          initialLimit={6}
+                          searchParams={searchParams}
+                          verifyingFlightId={verifyingFlightId}
+                        />
+                      ) : (
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 sm:p-12 text-center space-y-3">
+                          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-xl text-slate-400">
+                            🔍
+                          </div>
+                          <h4 className="text-base font-extrabold text-slate-900 dark:text-white">
+                            No flights match your filter selection
+                          </h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                            Try adjusting your price range, flight duration, stops, or airline selections.
+                          </p>
+                          <button
+                            onClick={handleResetFilters}
+                            className="mt-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+                          >
+                            Reset All Filters
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -313,6 +525,7 @@ function HomeContent() {
               <CarRentals />
               <TrendingHolidays />
               <OutdoorActivities />
+              <ExploreFlightsByAirline />
 
 
             </>
@@ -328,22 +541,23 @@ function HomeContent() {
         </main>
       </div>
 
-      {showPromo && minPrice > 0 && searchParams && (
-        <PromotionalPopup
-          route={`${searchParams.from ? searchParams.from.split(',')[0] : ''} to ${searchParams.to ? searchParams.to.split(',')[0] : ''}`}
-          minPrice={minPrice}
-          onClose={() => setShowPromo(false)}
-        />
-      )}
+
       <AIAssistant />
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={() => window.location.reload()}
       />
+      <FlightBookingModal
+        isOpen={isBookingModalOpen}
+        flight={selectedBookingFlight}
+        searchParams={searchParams}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </div>
   );
 }
+
 
 export default function Home() {
   return (

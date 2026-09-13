@@ -4,6 +4,8 @@ import * as flightService from '../services/flightService.js';
 
 // export const preCachePopularRoutes = flightService.preCachePopularRoutes;
 
+import { createFlightBookingRequestService } from '../services/flightBookingService.js';
+
 // Active Flight Search Controller
 export const searchFlights = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const result = await flightService.searchLiveFlights({
@@ -17,7 +19,15 @@ export const searchFlights = asyncHandler(async (req: Request, res: Response): P
   });
 });
 
-/*
+// Flight Booking Request Controller (Saves to DB & triggers customer/admin emails)
+export const createFlightBookingRequest = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const result = await createFlightBookingRequestService(req.body, req.ip);
+    res.status(201).json(result);
+  }
+);
+
+
 export const repriceFlight = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const result = await flightService.repriceLiveFlight({
     ...req.body,
@@ -60,7 +70,6 @@ export const getFlightDetails = asyncHandler(async (req: Request, res: Response)
     message: 'Flight details endpoint ready for live PNR repricing',
   });
 });
-*/
 
 
 

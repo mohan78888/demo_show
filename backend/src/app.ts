@@ -14,6 +14,9 @@ import currencyRoutes from './routes/currencyRoutes.js';
 
 const app = express();
 
+// Trust reverse proxies (Next.js rewrites, Cloudflare, Render, etc.)
+app.set('trust proxy', 1);
+
 // 1. Compression & HTTP Request Logger
 app.use(compression());
 app.use(pinoHttp({ logger }));

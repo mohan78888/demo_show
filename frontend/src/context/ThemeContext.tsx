@@ -21,17 +21,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+  const applyTheme = (isDark: boolean) => {
+    if (typeof document !== 'undefined') {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
     }
-  }, [darkMode]);
+  };
 
-  const toggleDarkMode = () => setDarkMode(prev => !prev);
+  const toggleDarkMode = () => {
+    setDarkMode(prev => {
+      const next = !prev;
+      applyTheme(next);
+      return next;
+    });
+  };
 
   return (
     <ThemeContext.Provider value={{ darkMode, setDarkMode, toggleDarkMode }}>

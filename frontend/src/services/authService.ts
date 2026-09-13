@@ -155,15 +155,15 @@ export const authService = {
   },
 
   setToken(token: string): void {
-    localStorage.setItem('triphawks_token', token);
+    localStorage.setItem('tourhelpdesk_token', token);
   },
 
   getToken(): string | null {
-    return localStorage.getItem('triphawks_token');
+    return localStorage.getItem('tourhelpdesk_token');
   },
 
   async logout(): Promise<void> {
-    localStorage.removeItem('triphawks_token');
+    localStorage.removeItem('tourhelpdesk_token');
     try {
       await fetch(`${getApiBase()}/auth/logout`, {
         method: 'POST',

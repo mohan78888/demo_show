@@ -21,3 +21,12 @@ export const hotelDetailsSchema = z.object({
   hotelKey: z.string().min(1, 'hotelKey is required'),
   searchKey: z.string().min(1, 'searchKey is required'),
 }).passthrough();
+
+export const hotelTempBookingSchema = z.object({
+  customerName: z.string().min(1, 'customerName is required').max(100).optional(),
+}).passthrough();
+
+export const hotelTicketSchema = z.object({
+  bookingRefNo: z.string().min(1, 'bookingRefNo is required').max(100).optional(),
+}).passthrough();
+

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: trip-hawks-backend
+    name: tourhelpdesk-backend
     env: node
     region: oregon
     plan: free

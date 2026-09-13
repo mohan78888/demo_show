@@ -1,7 +1,18 @@
+export interface FlightSegment {
+  origin: string;
+  destination: string;
+  departureTime: string;
+  arrivalTime: string;
+  airline: string;
+  airlineCode?: string;
+  flightNumber?: string;
+  duration?: string;
+}
 
 export interface Flight {
   id: string;
   airline: string;
+  airlineCode?: string;
   flightNumber?: string;
   airlineLogo: string;
   departureTime: string;
@@ -21,6 +32,18 @@ export interface Flight {
   seatsAvailable?: string;
   repriced?: boolean;
   searchKey?: string;
+  layovers?: string[];
+  segments?: FlightSegment[];
+}
+
+export interface FlightFilterState {
+  selectedAirlines: string[];
+  selectedStops: number[];
+  departureTimeSlots: string[]; // 'early' | 'morning' | 'afternoon' | 'evening'
+  arrivalTimeSlots: string[];
+  maxPrice: number;
+  maxDurationMinutes: number;
+  selectedLayovers: string[];
 }
 
 

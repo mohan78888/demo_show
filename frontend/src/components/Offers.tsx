@@ -1,6 +1,7 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import ScrollReveal from './ScrollReveal';
 import { useHorizontalScroll } from '../hooks/useHorizontalScroll';
 
@@ -10,6 +11,9 @@ export interface DetailedOffer {
   title: string;
   category: 'all' | 'flights' | 'hotels' | 'resorts' | 'packages';
   bgImage?: string;
+  code: string;
+  discount: string;
+  validity: string;
 }
 
 const EXCLUSIVE_OFFERS: DetailedOffer[] = [
@@ -19,6 +23,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'International Flight Deals',
     category: 'flights',
     bgImage: '/exclusive-offer/offer-1.webp',
+    code: 'INTFLY30',
+    discount: 'FLAT 30% OFF',
+    validity: 'Limited Seats'
   },
   {
     id: '2',
@@ -26,6 +33,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Luxury Hotel Escapes',
     category: 'hotels',
     bgImage: '/exclusive-offer/offer-2.webp',
+    code: 'HOTEL40',
+    discount: 'UP TO 40% OFF',
+    validity: 'Weekend Stay'
   },
   {
     id: '3',
@@ -33,6 +43,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Family Holiday Packages',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-3.webp',
+    code: 'FAMILYFUN',
+    discount: 'KIDS FLY FREE',
+    validity: 'Holiday Season'
   },
   {
     id: '4',
@@ -40,6 +53,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Luxury Cruise Adventures',
     category: 'resorts',
     bgImage: '/exclusive-offer/offer-4.webp',
+    code: 'CRUISE77',
+    discount: 'SAVE $450',
+    validity: 'All-Inclusive'
   },
   {
     id: '5',
@@ -47,6 +63,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Pay with Mastercard & Save',
     category: 'all',
     bgImage: '/exclusive-offer/offer-5.webp',
+    code: 'MCDEAL15',
+    discount: '15% CASHBACK',
+    validity: 'Partner Cards'
   },
   {
     id: '6',
@@ -54,6 +73,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Bus Travel Deals',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-6.webp',
+    code: 'BUSSMART',
+    discount: 'FLAT 25% OFF',
+    validity: 'Express Routes'
   },
   {
     id: '7',
@@ -61,6 +83,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Scenic Rail Journeys',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-7.webp',
+    code: 'RAILPASS',
+    discount: 'UP TO $120 OFF',
+    validity: 'Scenic Passes'
   },
   {
     id: '8',
@@ -68,6 +93,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Car Rental Offers',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-8.webp',
+    code: 'DRIVE29',
+    discount: '$29 / DAY',
+    validity: 'Unlimited Miles'
   },
   {
     id: '9',
@@ -75,6 +103,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Book Early & Save',
     category: 'all',
     bgImage: '/exclusive-offer/offer-9.webp',
+    code: 'EARLYBIRD',
+    discount: 'EXTRA 20% OFF',
+    validity: '30 Days Advance'
   },
   {
     id: '10',
@@ -82,6 +113,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Last Minute Getaways',
     category: 'all',
     bgImage: '/exclusive-offer/offer-10.webp',
+    code: 'FLASH99',
+    discount: 'FLAT $100 OFF',
+    validity: 'Next 48 Hours'
   },
   {
     id: '11',
@@ -89,6 +123,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Student Travel Savings',
     category: 'all',
     bgImage: '/exclusive-offer/offer-11.webp',
+    code: 'STUDENTX',
+    discount: '15% OFF + BAG',
+    validity: 'Verified Students'
   },
   {
     id: '12',
@@ -96,6 +133,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Honeymoon Specials',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-12.webp',
+    code: 'HONEYMOON',
+    discount: 'FREE UPGRADE',
+    validity: 'Couples Only'
   },
   {
     id: '13',
@@ -103,6 +143,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Summer Vacation Deals',
     category: 'all',
     bgImage: '/exclusive-offer/offer-13.webp',
+    code: 'SUMMER26',
+    discount: 'UP TO 35% OFF',
+    validity: 'Summer Travels'
   },
   {
     id: '14',
@@ -110,6 +153,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Festive Season Savings',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-14.webp',
+    code: 'FESTIVE',
+    discount: 'SAVE $200',
+    validity: 'Festive Bookings'
   },
   {
     id: '15',
@@ -117,6 +163,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Adventure Tours',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-15.webp',
+    code: 'ADVENTURE',
+    discount: 'FLAT 20% OFF',
+    validity: 'Guided Treks'
   },
   {
     id: '16',
@@ -124,6 +173,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Tropical Paradise Deals',
     category: 'resorts',
     bgImage: '/exclusive-offer/offer-16.webp',
+    code: 'BEACHSUN',
+    discount: 'UP TO 30% OFF',
+    validity: 'Island Getaways'
   },
   {
     id: '17',
@@ -131,6 +183,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Weekend City Escapes',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-17.webp',
+    code: 'CITYBREAK',
+    discount: 'FLAT $80 OFF',
+    validity: 'Weekend Flights'
   },
   {
     id: '18',
@@ -138,6 +193,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Premium Member Offers',
     category: 'all',
     bgImage: '/exclusive-offer/offer-18.webp',
+    code: 'VIPCLUB',
+    discount: 'EXTRA 25% OFF',
+    validity: 'Members Only'
   },
   {
     id: '19',
@@ -145,6 +203,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Senior Travel Discounts',
     category: 'all',
     bgImage: '/exclusive-offer/offer-19.webp',
+    code: 'SENIORCARE',
+    discount: 'FLAT 18% OFF',
+    validity: '60+ Travellers'
   },
   {
     id: '20',
@@ -152,6 +213,9 @@ const EXCLUSIVE_OFFERS: DetailedOffer[] = [
     title: 'Flight + Hotel Bundle',
     category: 'packages',
     bgImage: '/exclusive-offer/offer-20.webp',
+    code: 'BUNDLEMAX',
+    discount: 'SAVE UP TO $500',
+    validity: 'Flight + Hotel'
   }
 ];
 
@@ -161,6 +225,46 @@ const categoryIconMap: Record<string, string> = {
   resorts: '🏝️',
   packages: '🧳',
   all: '🏷️'
+};
+
+const getCategoryTheme = (category: string) => {
+  switch (category) {
+    case 'flights':
+      return {
+        gradient: 'from-blue-950/90 via-sky-950/60 to-blue-900/30',
+        glow: 'bg-blue-500',
+        badge: 'from-blue-600 to-indigo-600',
+        accent: 'text-sky-300'
+      };
+    case 'hotels':
+      return {
+        gradient: 'from-slate-950/90 via-amber-950/60 to-orange-900/30',
+        glow: 'bg-amber-500',
+        badge: 'from-amber-600 to-orange-600',
+        accent: 'text-amber-300'
+      };
+    case 'resorts':
+      return {
+        gradient: 'from-slate-950/90 via-cyan-950/60 to-teal-900/30',
+        glow: 'bg-cyan-500',
+        badge: 'from-cyan-600 to-teal-600',
+        accent: 'text-cyan-300'
+      };
+    case 'packages':
+      return {
+        gradient: 'from-slate-950/90 via-emerald-950/60 to-teal-900/30',
+        glow: 'bg-emerald-500',
+        badge: 'from-emerald-600 to-teal-600',
+        accent: 'text-emerald-300'
+      };
+    default:
+      return {
+        gradient: 'from-slate-950/90 via-purple-950/60 to-indigo-900/30',
+        glow: 'bg-purple-500',
+        badge: 'from-purple-600 to-indigo-600',
+        accent: 'text-purple-300'
+      };
+  }
 };
 
 const renderCardSvgBg = (id: string) => {
@@ -342,20 +446,33 @@ interface OffersProps {
 
 const Offers: React.FC<OffersProps> = ({ onSeeAll }) => {
   const { containerRef, scrollLeft, scrollRight } = useHorizontalScroll<HTMLDivElement>(320);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const handleCopy = (e: React.MouseEvent, code: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2500);
+  };
 
   return (
-    <section className="py-6 md:py-9 bg-white dark:bg-slate-950 transition-colors duration-300">
+    <section className="py-7 md:py-10 bg-white dark:bg-slate-950 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
 
-        {/* Compact Section Header - Preserved unmodified as requested */}
+        {/* Compact Section Header */}
         <ScrollReveal delay={0}>
           <div className="flex items-center justify-between mb-6">
             <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                  Featured Deals
+                </span>
+              </div>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Exclusive Offers
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-                Enjoy exclusive savings on your next adventure with our best travel offers.
+                Enjoy exclusive savings on flights, hotels, and holiday packages with verified promo codes.
               </p>
             </div>
 
@@ -386,15 +503,17 @@ const Offers: React.FC<OffersProps> = ({ onSeeAll }) => {
         {/* Offer Cards Carousel Container */}
         <div
           ref={containerRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide py-2 px-1 snap-x snap-mandatory scroll-smooth"
+          className="flex gap-4 sm:gap-5 overflow-x-auto scrollbar-hide py-3 px-1 snap-x snap-mandatory scroll-smooth"
         >
           {EXCLUSIVE_OFFERS.map((offer, index) => {
             const hasBg = Boolean(offer.bgImage);
+            const theme = getCategoryTheme(offer.category);
+            const isCopied = copiedCode === offer.code;
 
             return (
               <ScrollReveal
                 key={offer.id}
-                delay={Math.min(index * 80, 500)}
+                delay={Math.min(index * 60, 450)}
                 className="snap-start shrink-0"
               >
                 <div
@@ -407,87 +526,100 @@ const Offers: React.FC<OffersProps> = ({ onSeeAll }) => {
                       onSeeAll();
                     }
                   }}
-                  className={`w-[280px] sm:w-[310px] min-h-[178px] rounded-2xl border p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group cursor-pointer ${
-                    hasBg
-                      ? 'border-slate-700/80 bg-slate-950 text-white shadow-lg'
-                      : 'bg-gradient-to-br from-white via-slate-50/50 to-blue-50/20 dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-950 border-slate-200/80 dark:border-slate-800/90'
-                  }`}
+                  className="w-[290px] sm:w-[325px] h-[215px] sm:h-[230px] rounded-2xl border border-white/20 dark:border-white/10 group-hover:border-white/45 dark:group-hover:border-white/30 shadow-[0_12px_32px_rgba(15,23,42,0.18)] hover:shadow-[0_22px_45px_rgba(15,23,42,0.32)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group cursor-pointer bg-slate-900 text-white select-none"
                 >
-                  
-                  {/* Background Image / SVG Pattern */}
-                  {hasBg ? (
+                  {/* Frosted Specular Highlight Line at Top */}
+                  <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-20" />
+
+                  {/* Voucher Ticket Cutout Notches on Left and Right */}
+                  <div className="absolute -left-2.5 top-[60%] -translate-y-1/2 w-5 h-5 rounded-full bg-white dark:bg-slate-950 border-r border-slate-200/80 dark:border-slate-800/80 z-20 pointer-events-none" />
+                  <div className="absolute -right-2.5 top-[60%] -translate-y-1/2 w-5 h-5 rounded-full bg-white dark:bg-slate-950 border-l border-slate-200/80 dark:border-slate-800/80 z-20 pointer-events-none" />
+
+                  {/* Crisp, Fully Visible Background Image */}
+                  {hasBg && offer.bgImage ? (
                     <>
-                      <div
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
-                        style={{ backgroundImage: `url(${offer.bgImage})` }}
+                      {/* Full-Bleed High-Fidelity Photo */}
+                      <Image
+                        src={offer.bgImage}
+                        alt={offer.title}
+                        fill
+                        sizes="(max-width: 640px) 290px, 325px"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        priority={index < 4}
                       />
-                      {/* Soft gradient overlay so the image stays vivid & bright while text remains crisp */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/15 pointer-events-none" />
+
+                      {/* Soft top gradient solely for badge text contrast */}
+                      <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/50 via-black/20 to-transparent pointer-events-none" />
+
+                      {/* Bottom-focused gradient strictly behind text & coupon code */}
+                      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none" />
                     </>
                   ) : (
-                    /* Custom Elegant SVG Vector Background Overlay */
                     renderCardSvgBg(offer.id)
                   )}
 
-                  <div className="flex items-center justify-between gap-2 relative z-10">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black tracking-tight ${
-                      hasBg
-                        ? 'bg-blue-600 text-white border border-white/20 shadow-md backdrop-blur-sm'
-                        : 'bg-blue-50/90 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border border-blue-200/70 dark:border-blue-800/70 backdrop-blur-xs'
-                    }`}>
-                      {offer.badge}
-                    </span>
-                    <div className={`flex items-center gap-1.5 text-[11px] font-semibold ${
-                      hasBg ? 'text-white/90 bg-black/40 px-2 py-0.5 rounded-md border border-white/10 backdrop-blur-xs' : 'text-slate-400 dark:text-slate-500'
-                    }`}>
-                      <span>{categoryIconMap[offer.category] || '🏷️'}</span>
+                  {/* Card Content - Top Section */}
+                  <div className="relative z-10 p-4 pb-0">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-black tracking-tight text-white shadow-md border border-white/20 backdrop-blur-md bg-gradient-to-r ${theme.badge}`}>
+                        {offer.badge}
+                      </span>
+                      
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-amber-400/30 shadow-xs">
+                        <span>{categoryIconMap[offer.category] || '🏷️'}</span>
+                        <span>{offer.discount}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="my-1.5 relative z-10">
-                    <h3 className={`text-sm sm:text-base font-black tracking-tight line-clamp-2 transition-colors ${
-                      hasBg
-                        ? 'text-white group-hover:text-amber-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'
-                        : 'text-slate-900 dark:text-white group-hover:text-blue-600'
-                    }`}>
+                    <h3 className="text-sm sm:text-base font-black tracking-tight text-white line-clamp-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] group-hover:text-amber-200 transition-colors mt-1">
                       {offer.title}
                     </h3>
+                    <p className="text-[11px] font-medium text-slate-300/90 mt-0.5 drop-shadow-xs">
+                      {offer.validity}
+                    </p>
                   </div>
 
-                  {/* Attractive Animated Styled Text Bottom Row */}
-                  <div className={`flex items-center justify-between pt-2.5 border-t mt-auto relative z-10 transition-colors ${
-                    hasBg ? 'border-white/20' : 'border-slate-100 dark:border-slate-800/80'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span className={`text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${
-                        hasBg
-                          ? 'bg-gradient-to-r from-amber-300 via-yellow-200 to-emerald-300 bg-clip-text text-transparent group-hover:tracking-widest'
-                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:tracking-widest'
-                      }`}>
-                        Tap to Explore Deal
+                  {/* Card Content - Bottom Section (Voucher Code & Action) */}
+                  <div className="p-4 pt-3 border-t border-dashed border-white/20 mt-auto relative z-10 flex items-center justify-between gap-2">
+                    {/* Coupon Code Pill */}
+                    <div className="bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg border border-dashed border-amber-400/60 flex items-center gap-1.5 shadow-sm">
+                      <svg className="w-3 h-3 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      <span className="font-mono text-xs font-black tracking-wider text-amber-300 select-all">
+                        {offer.code}
                       </span>
                     </div>
 
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 transform group-hover:translate-x-1 ${
-                      hasBg
-                        ? 'bg-white/20 text-white group-hover:bg-amber-400 group-hover:text-slate-950 shadow-sm backdrop-blur-xs'
-                        : 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
-                    }`}>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
+                    {/* Copy Coupon Code Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleCopy(e, offer.code)}
+                      className={`px-3 py-1 rounded-lg font-black text-[11px] uppercase tracking-wider transition-all duration-200 flex items-center gap-1 shadow-sm cursor-pointer ${
+                        isCopied
+                          ? 'bg-emerald-500 text-white shadow-emerald-500/30 scale-105'
+                          : 'bg-white/15 hover:bg-white/25 text-white hover:text-white backdrop-blur-md border border-white/20 active:scale-95'
+                      }`}
+                    >
+                      {isCopied ? (
+                        <>
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </ScrollReveal>
             );
           })}
         </div>
-
       </div>
     </section>
   );

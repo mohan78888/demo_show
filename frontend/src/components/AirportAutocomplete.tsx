@@ -136,8 +136,22 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
     defaultAirport ? defaultAirport.code : (externalValue ? resolveIataCode(externalValue) : '')
   );
   const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [recentAirports, setRecentAirports] = useState<Airport[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load recent searches on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('tourhelpdesk_recent_airports');
+        if (saved) {
+          setRecentAirports(JSON.parse(saved));
+        }
+      } catch {}
+    }
+  }, []);
 
   // Sync externalValue prop changes if provided
   useEffect(() => {
@@ -178,6 +192,11 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
     ).slice(0, 15);
   }, [query]);
 
+  // Reset active index when query changes
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
   // Handle select airport item
   const handleSelect = (airport: Airport) => {
     const displayLabel = `${airport.city}, ${airport.country} (${airport.code})`;
@@ -185,8 +204,42 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
     setSelectedCode(airport.code);
     setIsOpen(false);
 
+    // Save to recents
+    if (typeof window !== 'undefined') {
+      try {
+        const next = [airport, ...recentAirports.filter(r => r.code !== airport.code)].slice(0, 4);
+        setRecentAirports(next);
+        localStorage.setItem('tourhelpdesk_recent_airports', JSON.stringify(next));
+      } catch {}
+    }
+
     if (onChange) {
       onChange(airport.code, airport);
+    }
+  };
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        setIsOpen(true);
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev < filteredAirports.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev > 0 ? prev - 1 : filteredAirports.length - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredAirports[activeIndex]) {
+        handleSelect(filteredAirports[activeIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
     }
   };
 
@@ -234,6 +287,7 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
               className="w-full bg-transparent border-0 outline-none p-0 text-slate-900 dark:text-white font-black text-xl sm:text-2xl md:text-3xl tracking-tight focus:ring-0 focus:outline-none"
               value={query}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               onFocus={() => setIsOpen(true)}
               autoFocus
             />
@@ -262,6 +316,7 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
           }
           value={query}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
         />
       )}
@@ -275,34 +330,76 @@ const AirportAutocomplete: React.FC<AirportAutocompleteProps> = ({
 
       {/* Autocomplete Dropdown List */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200 min-w-[280px]">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200 min-w-[300px]">
+          {/* Recent Searches Header if empty query */}
+          {(!query || query.trim().length === 0) && recentAirports.length > 0 && (
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-[#E8A11A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Recent Searches
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setRecentAirports([]);
+                  localStorage.removeItem('tourhelpdesk_recent_airports');
+                }}
+                className="text-[10px] font-semibold text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
           <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
             {filteredAirports.length > 0 ? (
-              filteredAirports.map((airport) => (
-                <button
-                  key={airport.code}
-                  type="button"
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-50/80 dark:hover:bg-slate-800 transition-colors border-b border-slate-100 dark:border-slate-800/60 last:border-0 text-left group cursor-pointer"
-                  onClick={() => handleSelect(airport)}
-                >
-                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                      ✈
+              filteredAirports.map((airport, idx) => {
+                const isActive = idx === activeIndex;
+                return (
+                  <button
+                    key={airport.code}
+                    type="button"
+                    className={`w-full px-4 py-3 flex items-center justify-between transition-colors border-b border-slate-100 dark:border-slate-800/60 last:border-0 text-left group cursor-pointer ${
+                      isActive 
+                        ? 'bg-blue-50/90 dark:bg-slate-800/90 ring-1 ring-blue-500/20' 
+                        : 'hover:bg-blue-50/80 dark:hover:bg-slate-800/60'
+                    }`}
+                    onClick={() => handleSelect(airport)}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0 transition-colors ${
+                        isActive 
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
+                      }`}>
+                        ✈
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className={`font-extrabold text-xs sm:text-sm truncate transition-colors ${
+                          isActive 
+                            ? 'text-blue-600 dark:text-blue-400' 
+                            : 'text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400'
+                        }`}>
+                          {airport.city}, {airport.country}
+                        </span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
+                          {airport.name}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-                        {airport.city}, {airport.country}
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
-                        {airport.name}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-xs font-black text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white transition-colors shrink-0">
-                    {airport.code}
-                  </span>
-                </button>
-              ))
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black shrink-0 transition-colors ${
+                      isActive
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white'
+                    }`}>
+                      {airport.code}
+                    </span>
+                  </button>
+                );
+              })
             ) : (
               <div className="px-4 py-6 text-center">
                 <p className="text-slate-500 dark:text-slate-400 font-bold text-xs">No airports found matching "{query}"</p>

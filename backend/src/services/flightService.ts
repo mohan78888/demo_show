@@ -157,6 +157,28 @@ export const searchLiveFlights = async (params: {
         const fareId = fareObj.Fare_Id || fareDetails.Fare_Id;
         const searchKey = responseData?.Search_Key || trip.Search_Key;
 
+        // Derive layover airports if stops > 0
+        const layovers: string[] = [];
+        if (segments.length > 1) {
+          for (let i = 0; i < segments.length - 1; i++) {
+            const layoverPort = segments[i].Destination || segments[i + 1]?.Origin;
+            if (layoverPort && !layovers.includes(layoverPort)) {
+              layovers.push(layoverPort);
+            }
+          }
+        }
+
+        const mappedSegments = segments.map((seg: any) => ({
+          origin: seg.Origin,
+          destination: seg.Destination,
+          departureTime: formatTimeAMPM(seg.Departure_DateTime),
+          arrivalTime: formatTimeAMPM(seg.Arrival_DateTime),
+          airline: getAirlineName(seg.Airline_Code, seg.Airline_Name),
+          airlineCode: seg.Airline_Code,
+          flightNumber: seg.Flight_Number,
+          duration: seg.Duration,
+        }));
+
         if (flightKey && fareId && searchKey) {
           liveFlightsList.push({
             id: flight.Flight_Id || `${airlineCode}_${flightIndex}_${Date.now()}`,
@@ -179,6 +201,8 @@ export const searchLiveFlights = async (params: {
             baggage: fareDetails.Free_Baggage?.Check_In_Baggage || '15 KG',
             refundable: fareDetails.Refundable ?? true,
             bookingLink: `#book-${flight.Flight_Id || flightIndex}`,
+            layovers: layovers,
+            segments: mappedSegments,
           });
         }
       });
@@ -216,7 +240,6 @@ export const searchLiveFlights = async (params: {
   }
 };
 
-/*
 export const repriceLiveFlight = async (params: {
   fareId: string;
   flightKey: string;
@@ -681,7 +704,6 @@ export const issueTicketLiveFlight = async (params: {
     };
   }
 };
-*/
 
 
 

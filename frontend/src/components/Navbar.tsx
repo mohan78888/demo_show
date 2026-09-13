@@ -253,15 +253,16 @@ const Navbar: React.FC<NavbarProps> = ({
           >
             <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105 shrink-0">
               <Image 
-                src="/tourhelpdesk.png" 
+                src="/tourhelpdesk-ts.png" 
                 alt="Tour Help Desk logo" 
-                width={120}
-                height={30}
+                width={26}
+                height={24}
                 priority
-                className={`object-contain h-5.5 sm:h-7 md:h-8 w-auto ${isTripHeader || darkMode ? 'brightness-110' : ''}`}
+                style={{ width: 'auto', height: 'auto' }}
+                className={`object-contain h-5 sm:h-5.5 md:h-6 w-auto ${isTripHeader || darkMode ? 'brightness-110' : ''}`}
               />
             </div>
-            <span className={`hidden md:inline text-xs sm:text-base md:text-lg font-extrabold tracking-tight truncate ml-0.5 ${
+            <span className={`hidden md:inline text-xs sm:text-sm md:text-base font-extrabold tracking-tight truncate ml-0.5 ${
               isTripHeader ? 'text-white' : 'text-slate-800 dark:text-white'
             }`}>
               Tour Help Desk
@@ -422,32 +423,35 @@ const Navbar: React.FC<NavbarProps> = ({
         } flex flex-col`}
       >
         {/* Sidebar Header */}
-        <div className="h-[72px] px-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3.5 shrink-0">
-          <button 
-            onClick={() => setIsSidebarOpen(false)}
-            className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer focus:outline-none"
-            aria-label="Close Sidebar"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          
+        <div className="h-[64px] px-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div 
-            className="flex items-center gap-2 cursor-pointer select-none group min-w-0"
+            className="flex items-center gap-2.5 cursor-pointer select-none group min-w-0"
             onClick={() => { onLogoClick(); setIsSidebarOpen(false); }}
           >
-            <Image 
-              src="/tourhelpdesk.png" 
-              alt="Tour Help Desk logo" 
-              width={120}
-              height={30}
-              className="object-contain h-7 w-auto"
-            />
-            <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-800 dark:text-white truncate">
+            <div className="flex items-center justify-center p-1 rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0">
+              <Image 
+                src="/tourhelpdesk-ts.png" 
+                alt="Tour Help Desk logo" 
+                width={26}
+                height={24}
+                style={{ width: 'auto', height: 'auto' }}
+                className="object-contain h-5.5 w-auto"
+              />
+            </div>
+            <span className="text-[15px] font-extrabold tracking-tight text-slate-900 dark:text-white whitespace-nowrap">
               Tour Help Desk
             </span>
           </div>
+
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer focus:outline-none shrink-0"
+            aria-label="Close Sidebar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         {/* Sidebar Scrollable Content */}

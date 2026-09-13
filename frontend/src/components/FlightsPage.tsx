@@ -8,6 +8,8 @@ import FlightHeroSection from './flights/FlightHeroSection';
 import ExclusiveFlightOffers from './flights/ExclusiveFlightOffers';
 import FlightTopDestinations from './flights/FlightTopDestinations';
 import FlightSeoFaq from './flights/FlightSeoFaq';
+import PromotionalPopup from './PromotionalPopup';
+import ExploreFlightsByAirline from './ExploreFlightsByAirline';
 
 interface FlightsPageProps {
   isCheapFlights?: boolean;
@@ -15,6 +17,17 @@ interface FlightsPageProps {
 
 export default function FlightsPage({ isCheapFlights = false }: FlightsPageProps = {}) {
   const router = useRouter();
+  const [showPromo, setShowPromo] = useState(false);
+
+  React.useEffect(() => {
+    if (isCheapFlights) {
+      const timer = window.setTimeout(() => {
+        setShowPromo(true);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [isCheapFlights]);
+
   const [searchForm, setSearchForm] = useState<FlightSearchFormState>({
     from: "JFK - New York, USA",
     to: "LHR - London, UK",
@@ -70,11 +83,23 @@ export default function FlightsPage({ isCheapFlights = false }: FlightsPageProps
       {/* 2. Exclusive Flight Offers & Coupon Codes Slider */}
       <ExclusiveFlightOffers />
 
+      {/* 2.5 Explore Flights by Airline */}
+      <ExploreFlightsByAirline />
+
       {/* 3. Top Destinations Grid */}
       <FlightTopDestinations onSelectDestination={handleSelectDestination} />
 
       {/* 4. SEO Content & FAQ Section */}
       <FlightSeoFaq isCheapFlights={isCheapFlights} />
+
+      {/* 5. Promotional Lowest Flight Popup - Exclusively displayed on Cheap Flights page */}
+      {isCheapFlights && showPromo && (
+        <PromotionalPopup
+          route="New York (JFK) to London (LHR)"
+          minPrice={499}
+          onClose={() => setShowPromo(false)}
+        />
+      )}
     </div>
   );
 }

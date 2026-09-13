@@ -42,7 +42,7 @@ const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onBack }) => {
             
             <p>
               The following Terms define the acceptable use of Tour Help Desk Inc. You may use
-              Travel Hawk for private and personal purposes only. You agree not to use Tour
+              Tour Helpdesk for private and personal purposes only. You agree not to use Tour
               Help Desk for any other purpose without our prior explicit written consent, and
               while using Tour Help Desk you agree to refrain from willfully, or carelessly -
             </p>

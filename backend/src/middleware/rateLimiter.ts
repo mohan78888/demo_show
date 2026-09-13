@@ -36,3 +36,15 @@ export const passwordResetLimiter = rateLimit({
     message: 'Too many password reset requests. Please try again after 15 minutes.',
   },
 });
+
+// Dedicated AI Assistant Rate Limiter (Protects LLM Quota & Prevents Cost Abuse)
+export const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Max 20 queries per 15 minutes per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many AI Assistant queries from this IP. Please wait a few minutes before trying again.',
+  },
+});
