@@ -250,10 +250,10 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
           {/* Glassmorphism badges */}
           <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5">
             <span className="bg-white/10 backdrop-blur-md border border-white/20 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[10px] sm:text-xs md:text-sm font-extrabold text-white tracking-wide shadow-sm flex items-center gap-1.5">
-              <span className="text-[#E8A11A] font-black">✔</span> Secure Payment
+              <span className="text-emerald-400 font-black">✔</span> Secure Payment
             </span>
             <span className="bg-white/10 backdrop-blur-md border border-white/20 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[10px] sm:text-xs md:text-sm font-extrabold text-white tracking-wide shadow-sm flex items-center gap-1.5">
-              <span className="text-[#E8A11A] font-black">✔</span> Support in approx. 30s
+              <span className="text-emerald-400 font-black">✔</span> Support in approx. 30s
             </span>
           </div>
         </div>

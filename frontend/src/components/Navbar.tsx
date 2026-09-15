@@ -396,7 +396,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 className={`${
                   isTripHeader 
                     ? 'bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-[11px] sm:text-xs px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap'
-                    : 'bg-gold-gradient hover:opacity-95 text-[#0F172A] font-extrabold text-[11px] sm:text-xs px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg transition-all active:scale-95 cursor-pointer shadow-sm whitespace-nowrap'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] sm:text-xs px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg transition-all active:scale-95 cursor-pointer shadow-sm whitespace-nowrap'
                 }`}
               >
                 <span className="sm:hidden">Sign In</span>

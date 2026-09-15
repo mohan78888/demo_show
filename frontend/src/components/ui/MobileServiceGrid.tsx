@@ -45,9 +45,9 @@ export const MobileServiceGrid: React.FC<MobileServiceGridProps> = ({
     action();
   };
 
-  // Shared Footer Navy (#0E255E) + Golden Ring/Icon (#E8A11A) styling
-  const brandIconStylePrimary = 'bg-[#0E255E] dark:bg-[#0b1a3e] text-[#E8A11A] border-2 border-[#E8A11A] shadow-md shadow-[#0E255E]/30 group-hover:border-amber-300 group-hover:text-amber-300 group-hover:shadow-amber-500/20';
-  const brandIconStyleSecondary = 'bg-[#0E255E]/90 dark:bg-[#0b1a3e]/90 text-[#E8A11A] border border-[#E8A11A]/80 shadow-sm shadow-[#0E255E]/20 group-hover:border-[#E8A11A] group-hover:text-amber-300';
+  // High-contrast clean styling: Deep Royal Navy background with crisp white icon and sleek blue accent border
+  const brandIconStylePrimary = 'bg-[#0E255E] dark:bg-blue-900/40 text-white border-2 border-blue-500/30 shadow-md shadow-blue-950/20 group-hover:border-blue-500 group-hover:bg-blue-700 transition-all';
+  const brandIconStyleSecondary = 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-2xs group-hover:border-blue-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all';
 
   // Row 1: Fixed 4 Equal Columns (Primary)
   const firstRowServices = [
