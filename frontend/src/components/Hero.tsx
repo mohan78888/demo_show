@@ -59,6 +59,19 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
   const [isPending, setIsPending] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+  const tabsContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Auto-scroll the active tab into clear view on mobile screens
+  useEffect(() => {
+    if (tabsContainerRef.current) {
+      const activeEl = tabsContainerRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement | null;
+      if (activeEl) {
+        const container = tabsContainerRef.current;
+        const scrollLeft = activeEl.offsetLeft - (container.clientWidth / 2) + (activeEl.clientWidth / 2);
+        container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
+      }
+    }
+  }, [activeTab]);
 
   // Controlled Flight Form States
   const [fromCity, setFromCity] = useState('Delhi (DEL)');
@@ -191,7 +204,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
   };
 
   const tabClass = (tabKey: SearchTab) => {
-    const base = "flex items-center gap-1.5 px-6 py-2.5 text-sm font-extrabold rounded-full transition-all duration-200 cursor-pointer select-none whitespace-nowrap";
+    const base = "flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-extrabold rounded-full transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 snap-center";
     if (activeTab === tabKey) {
       return `${base} bg-white text-slate-900 shadow-md`;
     }
@@ -264,53 +277,62 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
       <div className="relative z-20 w-[98%] sm:w-[92%] lg:w-[94%] max-w-5xl mx-auto flex flex-col items-center gap-1.5 sm:gap-2 -mt-6 sm:-mt-14 md:-mt-20">
         
         {/* Floating Dark Navy Navigation Bar */}
-        <div className="bg-[#0b3372]/90 backdrop-blur-md border border-white/15 p-1 rounded-full flex gap-1 items-center max-w-full overflow-x-auto select-none scrollbar-hide shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+        <div 
+          ref={tabsContainerRef}
+          className="bg-[#0b3372]/95 backdrop-blur-md border border-white/15 p-1 rounded-full flex gap-1 items-center max-w-full overflow-x-auto select-none scrollbar-hide shadow-[0_8px_24px_rgba(15,23,42,0.12)] scroll-smooth snap-x snap-mandatory px-1.5"
+        >
           
           <button 
+            data-tab="cruises"
             onClick={() => { setActiveTab('cruises'); setError(null); }}
             className={tabClass('cruises')}
           >
-            <span className={`material-symbols-outlined text-[18px] mr-0.5 shrink-0 ${activeTab === 'cruises' ? 'text-[#E8A11A]' : 'text-white'}`}>directions_boat</span>
+            <span className={`material-symbols-outlined text-[17px] sm:text-[18px] mr-0.5 shrink-0 ${activeTab === 'cruises' ? 'text-[#E8A11A]' : 'text-white'}`}>directions_boat</span>
             <span>Cruises</span>
           </button>
 
           <button 
+            data-tab="flights"
             onClick={() => { setActiveTab('flights'); setError(null); }}
             className={tabClass('flights')}
           >
-            <span className={`material-symbols-outlined text-[18px] mr-0.5 shrink-0 ${activeTab === 'flights' ? 'text-[#E8A11A]' : 'text-white'}`}>flight</span>
+            <span className={`material-symbols-outlined text-[17px] sm:text-[18px] mr-0.5 shrink-0 ${activeTab === 'flights' ? 'text-[#E8A11A]' : 'text-white'}`}>flight</span>
             <span>Flights</span>
           </button>
 
           <button 
+            data-tab="hotels"
             onClick={() => { setActiveTab('hotels'); setError(null); }}
             className={tabClass('hotels')}
           >
-            <span className={`material-symbols-outlined text-[18px] mr-0.5 shrink-0 ${activeTab === 'hotels' ? 'text-[#E8A11A]' : 'text-white'}`}>hotel</span>
+            <span className={`material-symbols-outlined text-[17px] sm:text-[18px] mr-0.5 shrink-0 ${activeTab === 'hotels' ? 'text-[#E8A11A]' : 'text-white'}`}>hotel</span>
             <span>Hotels</span>
           </button>
 
           <button 
+            data-tab="cars"
             onClick={() => { setActiveTab('cars'); setError(null); }}
             className={tabClass('cars')}
           >
-            <span className={`material-symbols-outlined text-[18px] mr-0.5 shrink-0 ${activeTab === 'cars' ? 'text-[#E8A11A]' : 'text-white'}`}>directions_car</span>
+            <span className={`material-symbols-outlined text-[17px] sm:text-[18px] mr-0.5 shrink-0 ${activeTab === 'cars' ? 'text-[#E8A11A]' : 'text-white'}`}>directions_car</span>
             <span>Car Rental</span>
           </button>
 
           <button 
+            data-tab="holiday"
             onClick={() => { setActiveTab('holiday'); setError(null); }}
             className={tabClass('holiday')}
           >
-            <span className={`material-symbols-outlined text-[18px] mr-0.5 shrink-0 ${activeTab === 'holiday' ? 'text-[#E8A11A]' : 'text-white'}`}>luggage</span>
+            <span className={`material-symbols-outlined text-[17px] sm:text-[18px] mr-0.5 shrink-0 ${activeTab === 'holiday' ? 'text-[#E8A11A]' : 'text-white'}`}>luggage</span>
             <span>Holiday</span>
           </button>
 
           <button 
+            data-tab="activities"
             onClick={() => { setActiveTab('activities'); setError(null); }}
             className={tabClass('activities')}
           >
-            <span className={`material-symbols-outlined text-[18px] mr-0.5 shrink-0 ${activeTab === 'activities' ? 'text-[#E8A11A]' : 'text-white'}`}>local_activity</span>
+            <span className={`material-symbols-outlined text-[17px] sm:text-[18px] mr-0.5 shrink-0 ${activeTab === 'activities' ? 'text-[#E8A11A]' : 'text-white'}`}>local_activity</span>
             <span>Activities</span>
           </button>
         </div>
