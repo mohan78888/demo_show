@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { ShieldCheck, Lock, Mail, CheckCircle2, FileText, AlertTriangle } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 
 interface CreditCardVerificationPageProps {
   onBack: () => void;
@@ -25,10 +26,10 @@ const CreditCardVerificationPage: React.FC<CreditCardVerificationPageProps> = ({
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold uppercase tracking-widest mb-3 backdrop-blur-sm">
+              <Badge variant="info" className="mb-3 backdrop-blur-xs">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                Secure Travel Authentication
-              </div>
+                <span>Secure Travel Authentication</span>
+              </Badge>
               <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">Credit Card Verification</h1>
               <p className="text-blue-100 text-sm md:text-base mt-2 max-w-2xl leading-relaxed">
                 Learn why and how we verify payment details to keep your bookings and accounts completely secure.

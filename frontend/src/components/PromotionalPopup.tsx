@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CONTACT_INFO } from '../constants/config';
+import { Badge } from '@/components/ui/Badge';
 
 interface PromotionalPopupProps {
   onClose: () => void;
@@ -75,9 +76,9 @@ const PromotionalPopup: React.FC<PromotionalPopupProps> = ({ onClose, minPrice, 
             </div>
             
             <h2 className="text-white text-sm md:text-base font-black mb-1.5 leading-tight px-2 md:px-0">Unpublished Price Alert</h2>
-            <div className="inline-block px-2.5 py-1 bg-orange-500 rounded-full text-white text-[9px] font-black uppercase tracking-widest shadow-lg">
+            <Badge variant="warning" className="shadow-lg bg-orange-500 text-white border-transparent">
               Flash Deal Available
-            </div>
+            </Badge>
           </div>
           
           <div className="p-3 md:p-4 flex flex-col items-center">

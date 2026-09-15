@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
+import { Badge } from './Badge';
 
 interface SectionHeaderProps {
   badge?: string;
@@ -25,9 +26,9 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
       )}
     >
       {badge && (
-        <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full border border-blue-100 dark:border-blue-800 mb-4 inline-block shadow-sm">
+        <Badge variant="info" className="mb-4 shadow-xs">
           {badge}
-        </span>
+        </Badge>
       )}
       <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
         {title}

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import ScrollReveal from './ScrollReveal';
 import { useHorizontalScroll } from '../hooks/useHorizontalScroll';
+import { Badge } from '@/components/ui/Badge';
 
 export interface DetailedOffer {
   id: string;
@@ -463,10 +464,8 @@ const Offers: React.FC<OffersProps> = ({ onSeeAll }) => {
         <ScrollReveal delay={0}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                  Featured Deals
-                </span>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="luxury">Featured Deals</Badge>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Exclusive Offers

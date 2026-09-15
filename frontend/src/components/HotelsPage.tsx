@@ -11,6 +11,7 @@ import { hotelService, HotelSearchParams, HotelDetailInfo } from '../services/ho
 const HotelDetailsModal = dynamic(() => import('./HotelDetailsModal'), { ssr: false });
 const HotelBookingModal = dynamic(() => import('./HotelBookingModal'), { ssr: false });
 const Accordion = dynamic(() => import('./ui/Accordion'), { ssr: true });
+import { Badge } from '@/components/ui/Badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2,
@@ -1134,10 +1135,10 @@ const HotelsPage: React.FC = () => {
       <section className="bg-white dark:bg-slate-950 py-12 md:py-16 border-t border-slate-200/60 dark:border-slate-800/80 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-left mb-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-extrabold uppercase tracking-wider mb-3 border border-blue-200/60 dark:border-blue-800/60">
-              <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <Badge variant="info" className="mb-3">
+              <HelpCircle className="w-4 h-4" />
               <span>Got Questions?</span>
-            </div>
+            </Badge>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               Frequently Asked Questions (FAQs)
             </h2>

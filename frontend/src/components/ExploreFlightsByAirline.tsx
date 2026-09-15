@@ -569,10 +569,6 @@ export default function ExploreFlightsByAirline() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-3">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#E8A11A] animate-pulse"></span>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#E8A11A]">Leading Global Carriers</span>
-          </div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Fly with your favorite airline
           </h2>

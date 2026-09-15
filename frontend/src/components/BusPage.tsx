@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from '@/components/ui/Badge';
 import BusSearchForm from './forms/BusSearchForm';
 import { 
   RedBusGraphic, 
@@ -400,9 +401,11 @@ export default function BusPage() {
           className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 md:px-8 text-center"
         >
           {/* Badge */}
-          <motion.div variants={scrollRevealVariants} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2 sm:mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Travel Further. Book Smarter.
+          <motion.div variants={scrollRevealVariants} className="mb-2 sm:mb-3">
+            <Badge variant="info">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Travel Further. Book Smarter.</span>
+            </Badge>
           </motion.div>
 
           {/* Heading */}
@@ -779,10 +782,10 @@ export default function BusPage() {
           
           {/* Main Title & Hero Overview */}
           <motion.div variants={scrollRevealVariants} className="max-w-4xl mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-[#E8A11A] text-xs font-black uppercase tracking-widest mb-4 border border-[#E8A11A]/30">
+            <Badge variant="luxury" className="mb-4">
               <Globe className="w-3.5 h-3.5" />
-              Official Online Travel Guide
-            </div>
+              <span>Official Online Travel Guide</span>
+            </Badge>
             
             <h2 className="text-2xl sm:text-3xl md:text-[34px] font-black tracking-tight leading-tight text-slate-900 dark:text-white mb-4">
               The Smart Way to Book Bus Travel

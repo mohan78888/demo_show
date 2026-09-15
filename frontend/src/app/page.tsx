@@ -368,9 +368,8 @@ function HomeContent() {
 
 
               {isSearching && (
-                <div id="search-loading-indicator" className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-16 md:py-20 text-center">
-                  <div className="inline-block w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-slate-500 font-bold">Finding the best flights for you...</p>
+                <div id="search-loading-indicator">
+                  <SkeletonLoader from={searchParams?.from} to={searchParams?.to} />
                 </div>
               )}
 
