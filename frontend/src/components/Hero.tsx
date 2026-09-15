@@ -61,14 +61,18 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
   const [heroSlideIndex, setHeroSlideIndex] = useState(0);
   const tabsContainerRef = React.useRef<HTMLDivElement>(null);
 
-  // Auto-scroll the active tab into clear view on mobile screens
+  // Auto-scroll the active tab into clear view on mobile screens (keep start anchored if in top 3)
   useEffect(() => {
     if (tabsContainerRef.current) {
-      const activeEl = tabsContainerRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement | null;
-      if (activeEl) {
-        const container = tabsContainerRef.current;
-        const scrollLeft = activeEl.offsetLeft - (container.clientWidth / 2) + (activeEl.clientWidth / 2);
-        container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
+      const container = tabsContainerRef.current;
+      if (activeTab === 'cruises' || activeTab === 'flights' || activeTab === 'hotels') {
+        container.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        const activeEl = container.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement | null;
+        if (activeEl) {
+          const scrollLeft = activeEl.offsetLeft - (container.clientWidth / 2) + (activeEl.clientWidth / 2);
+          container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
+        }
       }
     }
   }, [activeTab]);
@@ -204,7 +208,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isLoading }) => {
   };
 
   const tabClass = (tabKey: SearchTab) => {
-    const base = "flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-extrabold rounded-full transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 snap-center";
+    const base = "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-6 py-1.5 sm:py-2.5 text-[11px] sm:text-sm font-extrabold rounded-full transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0";
     if (activeTab === tabKey) {
       return `${base} bg-white text-slate-900 shadow-md`;
     }
